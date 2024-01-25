@@ -1,9 +1,15 @@
-from flask_sqlalchemy import SQLAlchemy
-
 from db.config import DB_NAME, DB_USER, DB_PASS
 from src.app import app
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{DB_USER}:{DB_PASS}@localhost/{DB_NAME}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+import mysql.connector
 
-db = SQLAlchemy(app)
+mydb = mysql.connector.connect(
+    host="localhost",
+    user=DB_USER,
+    passwd=DB_PASS
+)
+
+print(mydb)
+my_cursor = mydb.cursor()
+
+my_cursor.execute("CREATE DATABASE dbproj")
