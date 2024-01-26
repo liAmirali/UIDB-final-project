@@ -136,3 +136,29 @@ CREATE TABLE film_language(
     foreign key (film_id) references film(film_id),
     foreign key (language_id) references language(language_id)
 );
+
+-- trigger for delay condition
+DELIMITER //
+CREATE TRIGGER check_customer_delay
+BEFORE INSERT ON rental
+FOR EACH ROW
+BEGIN
+    declare delay_count int;
+
+    SELECT COUNT(*) INTO delay_count
+    FROM rental
+    WHERE customer_id = NEW.customer_id 
+    AND (
+        (return_date IS NULL AND NOW() > due_date) 
+        OR 
+        (return_date IS NOT NULL AND return_date > due_date)
+    );
+
+    IF delay_count > 10 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'TOO MANY DELAYS FOR THIS CUSTOMER';
+    END IF;
+END;
+//
+
+DELIMITER ;
