@@ -1,15 +1,3 @@
-CREATE TABLE user(
-	user_id INT PRIMARY KEY auto_increment,
-    first_name VARCHAR(20),
-    last_name VARCHAR(20),
-    username VARCHAR(20) NOT NULL,
-    password VARCHAR(20) NOT NULL,
-    email VARCHAR(20),
-    address_id INT,
-    role ENUM ('costumer', 'manager')
-);
-
-
 CREATE TABLE address(
 	address_id INT PRIMARY KEY auto_increment,
     address VARCHAR(250),
@@ -20,6 +8,46 @@ CREATE TABLE address(
     location VARCHAR(50),
     city VARCHAR(20),
     country VARCHAR(20)
+);
+
+CREATE TABLE user(
+	user_id INT PRIMARY KEY auto_increment,
+    first_name VARCHAR(20),
+    last_name VARCHAR(20),
+    username VARCHAR(20) NOT NULL,
+    password VARCHAR(20) NOT NULL,
+    email VARCHAR(20),
+    address_id INT,
+    role ENUM ('costumer', 'manager'),
+    foreign key (address_id) references address(address_id)
+);
+
+CREATE TABLE film(
+	film_id INT PRIMARY KEY auto_increment,
+    title VARCHAR(100) not null,
+	description VARCHAR(250),
+    release_date DATE,
+    rate INT,
+    rent_cost_per_day INT default 2,
+    penalty_cost_per_day INT default 3
+);
+
+CREATE TABLE shop(
+	shop_id INT PRIMARY KEY auto_increment,
+    shop_name VARCHAR(50),
+    manager_id INT not null,
+    address_id INT not null,
+	foreign key (manager_id) references user(user_id),
+	foreign key (address_id) references address(address_id)
+);
+
+CREATE TABLE dvd(
+	dvd_id INT PRIMARY KEY auto_increment,
+    film_id INT not null,
+    shop_id INT not null,
+    production_date date,
+	foreign key (film_id) references film(film_id),
+	foreign key (shop_id) references shop(shop_id)
 );
 
 CREATE TABLE reserve_req(
@@ -54,40 +82,11 @@ CREATE TABLE payment(
     foreign key (rental_id) references rental(rental_id)
 );
 
-CREATE TABLE shop(
-	shop_id INT PRIMARY KEY auto_increment,
-    shop_name VARCHAR(50),
-    manager_id INT not null,
-    address_id INT not null,
-	foreign key (manager_id) references user(user_id),
-	foreign key (address_id) references address(address_id)
-);
-
-CREATE TABLE dvd(
-	dvd_id INT PRIMARY KEY auto_increment,
-    film_id INT not null,
-    shop_id INT not null,
-    production_date date,
-	foreign key (film_id) references film(film_id),
-	foreign key (shop_id) references shop(shop_id)
-);
-
-CREATE TABLE film(
-	film_id INT PRIMARY KEY auto_increment,
-    title VARCHAR(100) not null,
-	description VARCHAR(250),
-    release_date DATE,
-    rate INT,
-    rent_cost_per_day INT default 2,
-    penalty_cost_per_day INT default 3
-);
-
 CREATE TABLE actor(
 	actor_id INT PRIMARY KEY auto_increment,
     first_name VARCHAR(20),
     last_name VARCHAR(20)
 );
-
 
 CREATE TABLE plays(
 	film_id INT not null,
