@@ -26,7 +26,7 @@ CREATE TABLE film(
 	film_id INT PRIMARY KEY auto_increment,
     title VARCHAR(100) not null,
 	description VARCHAR(250),
-    release_date DATE,
+    release_date TIMESTAMP,
     rate INT,
     rent_cost_per_day INT default 2,
     penalty_cost_per_day INT default 3
@@ -39,7 +39,8 @@ CREATE TABLE shop(
     address_id INT not null,
 	foreign key (manager_id) references user(user_id),
 	foreign key (address_id) references address(address_id),
-    CONSTRAINT check_manager_limit CHECK (NOT EXISTS (SELECT manager_id, count(shop_id) as shop_cnt
+    CONSTRAINT check_manager_limit CHECK (NOT EXISTS
+        (SELECT manager_id, count(shop_id) as shop_cnt
         FROM shop
         GROUP BY manager_id
         HAVING shop_cnt > 2;))
@@ -49,7 +50,7 @@ CREATE TABLE dvd(
 	dvd_id INT PRIMARY KEY auto_increment,
     film_id INT not null,
     shop_id INT not null,
-    production_date date,
+    production_date TIMESTAMP,
 	foreign key (film_id) references film(film_id),
 	foreign key (shop_id) references shop(shop_id)
 );
@@ -69,18 +70,23 @@ CREATE TABLE rental(
 	rental_id INT PRIMARY KEY auto_increment,
     customer_id INT not null,
     dvd_id INT not null,
-    rental_date DATE not null,
-    return_date DATE NULL default null,
-	due_date DATE,
+    rental_date TIMESTAMP not null,
+    return_date TIMESTAMP NULL default null,
+	due_date TIMESTAMP,
     accepted BOOLEAN DEFAULT FALSE,
-    check_date DATE NULL default null,
+    check_date TIMESTAMP NULL default null,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id),
-    CONSTRAINT check_rent_count_limit CHECK (NOT EXISTS (SELECT customer_id, shop_id, count(dvd_id) as dvd_cnt
+    CONSTRAINT check_rent_count_limit CHECK (NOT EXISTS
+        (SELECT customer_id, shop_id, count(dvd_id) as dvd_cnt
         FROM rental JOIN dvd USING (dvd_id)
         WHERE return_date IS NULL
         GROUP BY customer_id, shop_id
-        HAVING dvd_cnt > 3))
+        HAVING dvd_cnt > 3)),
+    CONSTRAINT check_rental_duration CHECK (NOT EXISTS
+        (SELECT rental_id FROM rental
+        WHERE TIMESTAMPDIFF(DAY, rental_date, due_date) > 14
+        OR TIMESTAMPDIFF(DAY, rental_date, due_date) < 1));
 );
 
 CREATE TABLE payment(
