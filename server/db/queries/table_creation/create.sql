@@ -18,7 +18,7 @@ CREATE TABLE user(
     password VARCHAR(20) NOT NULL,
     email VARCHAR(20),
     address_id INT,
-    role ENUM ('costumer', 'manager'),
+    role ENUM ('customer', 'manager'),
     foreign key (address_id) references address(address_id)
 );
 
@@ -52,25 +52,25 @@ CREATE TABLE dvd(
 
 CREATE TABLE reserve_req(
 	reserve_id INT PRIMARY KEY auto_increment,
-    costumer_id INT not null,
+    customer_id INT not null,
     dvd_id INT not null,
     creation_date timestamp not null default current_timestamp,
     accepted BOOLEAN DEFAULT FALSE,
     check_date timestamp default null,
-    foreign key (costumer_id) references user(user_id),
+    foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
 );
 
 CREATE TABLE rental(
 	rental_id INT PRIMARY KEY auto_increment,
-    costumer_id INT not null,
+    customer_id INT not null,
     dvd_id INT not null,
-    renrtal_date timestamp,
-    return_date timestamp default null,
-	due_date timestamp,
+    rental_date DATE not null,
+    return_date DATE NULL default null,
+	due_date DATE,
     accepted BOOLEAN DEFAULT FALSE,
-    check_date timestamp default null,
-    foreign key (costumer_id) references user(user_id),
+    check_date DATE NULL default null,
+    foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
 );
 
