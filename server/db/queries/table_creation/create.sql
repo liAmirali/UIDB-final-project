@@ -38,7 +38,11 @@ CREATE TABLE shop(
     manager_id INT not null,
     address_id INT not null,
 	foreign key (manager_id) references user(user_id),
-	foreign key (address_id) references address(address_id)
+	foreign key (address_id) references address(address_id),
+    CONSTRAINT check_manager_limit CHECK (NOT EXISTS (SELECT manager_id, count(shop_id) as shop_cnt
+        FROM shop
+        GROUP BY manager_id
+        HAVING shop_cnt > 2;))
 );
 
 CREATE TABLE dvd(
@@ -71,7 +75,7 @@ CREATE TABLE rental(
     accepted BOOLEAN DEFAULT FALSE,
     check_date DATE NULL default null,
     foreign key (customer_id) references user(user_id),
-	foreign key (dvd_id) references dvd(dvd_id)
+	foreign key (dvd_id) references dvd(dvd_id),
     CONSTRAINT check_rent_count_limit CHECK (NOT EXISTS (SELECT customer_id, shop_id, count(dvd_id) as dvd_cnt
         FROM rental JOIN dvd USING (dvd_id)
         WHERE return_date IS NULL
