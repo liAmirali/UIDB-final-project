@@ -38,12 +38,7 @@ CREATE TABLE shop(
     manager_id INT not null,
     address_id INT not null,
 	foreign key (manager_id) references user(user_id),
-	foreign key (address_id) references address(address_id),
-    CONSTRAINT check_manager_limit CHECK (NOT EXISTS
-        (SELECT manager_id, count(shop_id) as shop_cnt
-        FROM shop
-        GROUP BY manager_id
-        HAVING shop_cnt > 2;))
+	foreign key (address_id) references address(address_id)
 );
 
 CREATE TABLE dvd(
@@ -76,17 +71,7 @@ CREATE TABLE rental(
     accepted BOOLEAN DEFAULT FALSE,
     check_date TIMESTAMP NULL default null,
     foreign key (customer_id) references user(user_id),
-	foreign key (dvd_id) references dvd(dvd_id),
-    CONSTRAINT check_rent_count_limit CHECK (NOT EXISTS
-        (SELECT customer_id, shop_id, count(dvd_id) as dvd_cnt
-        FROM rental JOIN dvd USING (dvd_id)
-        WHERE return_date IS NULL
-        GROUP BY customer_id, shop_id
-        HAVING dvd_cnt > 3)),
-    CONSTRAINT check_rental_duration CHECK (NOT EXISTS
-        (SELECT rental_id FROM rental
-        WHERE TIMESTAMPDIFF(DAY, rental_date, due_date) > 14
-        OR TIMESTAMPDIFF(DAY, rental_date, due_date) < 1));
+	foreign key (dvd_id) references dvd(dvd_id)
 );
 
 CREATE TABLE payment(
@@ -168,6 +153,54 @@ BEGIN
 		SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'ALREADY RENTED';
     END if;
+END;
+//
+
+CREATE TRIGGER check_manager_limit
+BEFORE INSERT ON shop
+FOR EACH ROW
+BEGIN
+    DECLARE shop_count INT;
+
+    SELECT COUNT(*) INTO shop_count
+    FROM shop
+    WHERE manager_id = NEW.manager_id;
+
+    IF shop_count > 2 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Manager cannot be assigned to more than 2 shops';
+    END IF;
+END;
+//
+
+CREATE TRIGGER check_rent_count_limit
+BEFORE INSERT ON rental
+FOR EACH ROW
+BEGIN
+    DECLARE dvd_count INT;
+
+    SELECT COUNT(*) INTO dvd_count
+    FROM rental r
+    JOIN dvd d ON r.dvd_id = d.dvd_id
+    WHERE r.customer_id = NEW.customer_id
+      AND d.shop_id = (SELECT shop_id FROM dvd WHERE dvd_id = NEW.dvd_id)
+      AND r.return_date IS NULL;
+
+    IF dvd_count > 3 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Customer cannot rent more than 3 DVDs from the same shop simultaneously';
+    END IF;
+END;
+//
+
+CREATE TRIGGER check_rental_duration
+BEFORE INSERT ON rental
+FOR EACH ROW
+BEGIN
+    IF TIMESTAMPDIFF(DAY, NEW.rental_date, NEW.due_date) > 14 OR TIMESTAMPDIFF(DAY, NEW.rental_date, NEW.due_date) < 1 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Rental duration must be between 1 and 14 days';
+    END IF;
 END;
 //
 
