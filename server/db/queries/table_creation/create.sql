@@ -72,6 +72,11 @@ CREATE TABLE rental(
     check_date DATE NULL default null,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
+    CONSTRAINT check_rent_count_limit CHECK (NOT EXISTS (SELECT customer_id, shop_id, count(dvd_id) as dvd_cnt
+        FROM rental JOIN dvd USING (dvd_id)
+        WHERE return_date IS NULL
+        GROUP BY customer_id, shop_id
+        HAVING dvd_cnt > 3))
 );
 
 CREATE TABLE payment(
