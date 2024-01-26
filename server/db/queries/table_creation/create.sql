@@ -137,13 +137,14 @@ CREATE TABLE film_language(
     foreign key (language_id) references language(language_id)
 );
 
--- trigger for delay condition
+-- trigger for delay condition and active rent for same dvd
 DELIMITER //
-CREATE TRIGGER check_customer_delay
+CREATE TRIGGER on_before_rent_insert
 BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
     declare delay_count int;
+	declare active_rent_count int;
 
     SELECT COUNT(*) INTO delay_count
     FROM rental
@@ -158,6 +159,15 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'TOO MANY DELAYS FOR THIS CUSTOMER';
     END IF;
+
+    select count(*) INTO active_rent_count
+    from rental
+    where dvd_id = NEW.dvd_id AND return_date is null;
+	
+    IF active_rent_count > 1 THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ALREADY RENTED';
+    END if;
 END;
 //
 
