@@ -50,12 +50,12 @@ CREATE TABLE dvd(
 	foreign key (shop_id) references shop(shop_id)
 );
 
-CREATE TABLE reserve_req(
+CREATE TABLE reserve(
 	reserve_id INT PRIMARY KEY auto_increment,
     customer_id INT not null,
     dvd_id INT not null,
-    creation_date timestamp not null default current_timestamp,
-    accepted BOOLEAN DEFAULT FALSE,
+    created_at timestamp not null default current_timestamp,
+    accepted BOOLEAN DEFAULT NULL,
     check_date timestamp default null,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
@@ -65,11 +65,11 @@ CREATE TABLE rental(
 	rental_id INT PRIMARY KEY auto_increment,
     customer_id INT not null,
     dvd_id INT not null,
-    rental_date TIMESTAMP not null,
-    return_date TIMESTAMP NULL default null,
-	due_date TIMESTAMP,
-    accepted BOOLEAN DEFAULT FALSE,
-    check_date TIMESTAMP NULL default null,
+    rental_date TIMESTAMP NULL DEFAULT NULL,
+	due_date TIMESTAMP NULL DEFAULT NULL,
+    return_date TIMESTAMP NULL DEFAULT NULL,
+    status ENUM("checking", "rejected", "accepted") DEFAULT "checking",
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
 );
