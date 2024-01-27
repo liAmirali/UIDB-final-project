@@ -205,3 +205,21 @@ END;
 //
 
 DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER active_rent_check
+BEFORE INSERT ON rental
+FOR EACH ROW
+BEGIN
+    declare active_rent_count int;
+    select count(*) INTO active_rent_count
+    from rental
+    where dvd_id = NEW.dvd_id AND return_date is null;
+	
+    IF active_rent_count > 1 THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ALREADY RENTED';
+    END if;
+END;
+//
