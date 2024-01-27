@@ -1,4 +1,4 @@
-CREATE TABLE address(
+CREATE TABLE IF NOT EXISTS address(
 	address_id INT PRIMARY KEY auto_increment,
     address VARCHAR(250),
     address2 VARCHAR(250),
@@ -10,7 +10,7 @@ CREATE TABLE address(
     country VARCHAR(20)
 );
 
-CREATE TABLE user(
+CREATE TABLE IF NOT EXISTS user(
 	user_id INT PRIMARY KEY auto_increment,
     first_name VARCHAR(20),
     last_name VARCHAR(20),
@@ -22,7 +22,7 @@ CREATE TABLE user(
     foreign key (address_id) references address(address_id)
 );
 
-CREATE TABLE film(
+CREATE TABLE IF NOT EXISTS film(
 	film_id INT PRIMARY KEY auto_increment,
     title VARCHAR(100) not null,
 	description VARCHAR(250),
@@ -32,7 +32,7 @@ CREATE TABLE film(
     penalty_cost_per_day INT default 3
 );
 
-CREATE TABLE shop(
+CREATE TABLE IF NOT EXISTS shop(
 	shop_id INT PRIMARY KEY auto_increment,
     shop_name VARCHAR(50),
     manager_id INT not null,
@@ -41,7 +41,7 @@ CREATE TABLE shop(
 	foreign key (address_id) references address(address_id)
 );
 
-CREATE TABLE dvd(
+CREATE TABLE IF NOT EXISTS dvd(
 	dvd_id INT PRIMARY KEY auto_increment,
     film_id INT not null,
     shop_id INT not null,
@@ -50,7 +50,7 @@ CREATE TABLE dvd(
 	foreign key (shop_id) references shop(shop_id)
 );
 
-CREATE TABLE reserve(
+CREATE TABLE IF NOT EXISTS reserve(
 	reserve_id INT PRIMARY KEY auto_increment,
     customer_id INT not null,
     dvd_id INT not null,
@@ -61,7 +61,7 @@ CREATE TABLE reserve(
 	foreign key (dvd_id) references dvd(dvd_id)
 );
 
-CREATE TABLE rental(
+CREATE TABLE IF NOT EXISTS rental(
 	rental_id INT PRIMARY KEY auto_increment,
     customer_id INT not null,
     dvd_id INT not null,
@@ -69,12 +69,12 @@ CREATE TABLE rental(
 	due_date TIMESTAMP NULL DEFAULT NULL,
     return_date TIMESTAMP NULL DEFAULT NULL,
     status ENUM("checking", "rejected", "accepted") DEFAULT "checking",
-    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
 );
 
-CREATE TABLE payment(
+CREATE TABLE IF NOT EXISTS payment(
 	payment_id INT PRIMARY KEY auto_increment,
     rental_id INT not null,
     payment_date timestamp not null,
@@ -82,13 +82,13 @@ CREATE TABLE payment(
     foreign key (rental_id) references rental(rental_id)
 );
 
-CREATE TABLE actor(
+CREATE TABLE IF NOT EXISTS actor(
 	actor_id INT PRIMARY KEY auto_increment,
     first_name VARCHAR(20),
     last_name VARCHAR(20)
 );
 
-CREATE TABLE plays(
+CREATE TABLE IF NOT EXISTS plays(
 	film_id INT not null,
     actor_id INT not null,
     PRIMARY KEY (film_id, actor_id),
@@ -96,17 +96,17 @@ CREATE TABLE plays(
     foreign key (actor_id) references actor(actor_id)
 );
 
-CREATE TABLE category(
+CREATE TABLE IF NOT EXISTS category(
 	category_id INT PRIMARY KEY auto_increment,
     category_name VARCHAR(20) not null
 );
 
-CREATE TABLE language(
+CREATE TABLE IF NOT EXISTS language(
 	language_id INT PRIMARY KEY auto_increment,
     language_name VARCHAR(20) not null
 );
 
-CREATE TABLE film_category(
+CREATE TABLE IF NOT EXISTS film_category(
 	film_id INT not null,
 	category_id INT not null,
     PRIMARY KEY (film_id, category_id),
@@ -114,7 +114,7 @@ CREATE TABLE film_category(
     foreign key (category_id) references category(category_id)
 );
 
-CREATE TABLE film_language(
+CREATE TABLE IF NOT EXISTS film_language(
 	film_id INT not null,
 	language_id INT not null,
     PRIMARY KEY (film_id, language_id),
@@ -204,10 +204,6 @@ BEGIN
 END;
 //
 
-DELIMITER ;
-
-
-DELIMITER //
 CREATE TRIGGER active_rent_check
 BEFORE INSERT ON rental
 FOR EACH ROW
@@ -223,3 +219,24 @@ BEGIN
     END if;
 END;
 //
+
+CREATE TRIGGER no_rent_reserved
+BEFORE INSERT ON rental
+FOR EACH ROW
+BEGIN
+    DECLARE reserve_accepted BOOLEAN;
+    
+    -- Check if the dvd_id being inserted is in reserve with accepted = true
+    SELECT accepted INTO reserve_accepted 
+    FROM reserve 
+    WHERE dvd_id = NEW.dvd_id AND accepted = TRUE;
+    
+    -- If found, prevent insertion
+    IF reserve_accepted THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot add DVD with accepted reservation into rental';
+    END IF;
+END;
+//
+
+DELIMITER ;
