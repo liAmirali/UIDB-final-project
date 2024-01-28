@@ -1,5 +1,6 @@
 from views.utils import *
 from views.customer_view import show_customer_screen
+from views.manager_view import show_manager_screen
 from db.db import db_conn, db_cursor
 from src.app import app
 from models.user import User
@@ -49,7 +50,7 @@ def get_login_credentials(role):
         if role == "customer":
             show_customer_screen()
         elif role == "manager":
-            pass
+            show_manager_screen()
 
     else:
         print_error("No user found with the given credentials.")

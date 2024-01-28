@@ -148,5 +148,5 @@ def show_rent_requests():
     print(foundlist)
     wait_on_enter()
 
-def show_reserve_requests():
+# def show_reserve_requests():
     

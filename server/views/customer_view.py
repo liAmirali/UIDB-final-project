@@ -9,15 +9,15 @@ def show_customer_screen():
         clear_screen()
         print_header("Customer View")
 
-        print("1. View all shops")
-        print("2. View and Edit profile")
-        print("3. View films by category")
-        print("4. Search Films")
-        print("5. Rental Details")
-        print("6. View Rental History")
-        print("7. Reserve a Film")
-        print("8. Rent a Film")
-        print("9. Return a Rented DVD")
+        print(" 1. View all shops")
+        print(" 2. View and Edit profile")
+        print(" 3. View films by category")
+        print(" 4. Search Films")
+        print(" 5. Rental Details")
+        print(" 6. View Rental History")
+        print(" 7. Reserve a Film")
+        print(" 8. Rent a Film")
+        print(" 9. Return a Rented DVD")
         print("10. Active Rents")
         print("11. Payment Information")
         print("12. Logout")
@@ -162,10 +162,50 @@ def view_film_list():
 
     selected_category_id = input("Input the category ID: ")
     db_cursor.execute(
-        f"SELECT * FROM film WHERE category_id={selected_category_id} ORDER BY rate")
+        f"SELECT * FROM film JOIN film_category USING(film_id) WHERE category_id={selected_category_id} ORDER BY rate DESC, title")
     films = db_cursor.fetchall()
 
     for film in films:
         print(film)
+
+    wait_on_enter()
+
+
+def search_films():
+    clear_screen()
+    print_header("Search Films")
+
+    print("1. By Actor")
+    print("2. By Genre")
+    print("3. By Film Name")
+    print("4. By Film Language")
+    print("5. By Release Year")
+
+    option = read_menu_opt()
+
+    search_query = print("Enter your search query: ")
+    if option == "1":
+        query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{
+            search_query}%' OR last_name LIKE '%{search_query}%'"
+    elif option == "2":
+        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category LIKE '%{
+            search_query}%'"
+    elif option == "3":
+        query = f"SELECT * FROM film WHERE title LIKE '%{search_query}%'"
+    elif option == "4":
+        query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{
+            search_query}%'"
+    elif option == "5":
+        query = f"SELECT * FROM film YEAR(release_date) = {search_query}"
+    else:
+        print_error("Invalid option")
+        wait_on_enter()
+        return
+
+    db_cursor.execute(query)
+    films = db_cursor.fetchall()
+
+    for f in films:
+        print(f)
 
     wait_on_enter()
