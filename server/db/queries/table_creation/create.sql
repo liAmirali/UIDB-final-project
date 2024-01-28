@@ -12,11 +12,11 @@ CREATE TABLE IF NOT EXISTS address(
 
 CREATE TABLE IF NOT EXISTS user(
 	user_id INT PRIMARY KEY auto_increment,
-    first_name VARCHAR(20),
-    last_name VARCHAR(20),
-    username VARCHAR(20) NOT NULL,
-    password VARCHAR(20) NOT NULL,
-    email VARCHAR(20),
+    first_name VARCHAR(250),
+    last_name VARCHAR(250),
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
     address_id INT,
     role ENUM ('customer', 'manager'),
     foreign key (address_id) references address(address_id)

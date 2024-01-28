@@ -19,5 +19,6 @@ DROP TRIGGER IF EXISTS `on_before_rent_insert`;
 DROP TRIGGER IF EXISTS `check_manager_limit`;
 DROP TRIGGER IF EXISTS `check_rent_count_limit`;
 DROP TRIGGER IF EXISTS `check_rental_duration`;
+DROP TRIGGER IF EXISTS  `no_rent_reserved`;
 
 SET FOREIGN_KEY_CHECKS = 1;
