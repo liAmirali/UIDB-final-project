@@ -1,11 +1,10 @@
 SELECT
-    r.rental_id,
+    r.reserve_id,
     r.customer_id,
     r.dvd_id,
-    r.rental_date,
-    r.due_date
+    r.created_at
 FROM
-    rental r
+    reserve r
 JOIN
     dvd d ON r.dvd_id = d.dvd_id
 JOIN

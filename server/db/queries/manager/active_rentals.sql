@@ -12,4 +12,4 @@ JOIN
     shop s ON d.shop_id = s.shop_id
 WHERE
     s.manager_id = 1
-    AND r.return_date IS NULL;
+    AND r.status = "accepted" AND r.return_date IS NULL;
