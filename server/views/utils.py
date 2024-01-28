@@ -22,7 +22,7 @@ def read_menu_opt():
 
 
 def wait_on_enter():
-    input("Press Enter to continue...")
+    input("\nPress Enter to continue...")
 
 def print_header(text):
     header_text = f"""
