@@ -14,12 +14,15 @@ CREATE TABLE IF NOT EXISTS user(
 	user_id INT PRIMARY KEY auto_increment,
     first_name VARCHAR(250),
     last_name VARCHAR(250),
-    username VARCHAR(100) NOT NULL UNIQUE,
+    username VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100),
     address_id INT,
     role ENUM ('customer', 'manager'),
-    foreign key (address_id) references address(address_id)
+    foreign key (address_id) references address(address_id),
+    UNIQUE (username),
+    UNIQUE (email),
+    UNIQUE (address_id)
 );
 
 CREATE TABLE IF NOT EXISTS film(

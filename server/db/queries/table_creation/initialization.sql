@@ -9,7 +9,28 @@ INSERT INTO address (address, address2, district, postal_code, phone, location, 
 ('404 Birch Court', '', 'Hills', '24680', '999-888-7777', 'Seattle', 'Washington', 'USA'),
 ('505 Walnut Place', 'Suite 301', 'Valley', '56789', '666-555-4444', 'San Francisco', 'California', 'USA'),
 ('606 Spruce Avenue', '', 'Mountains', '98765', '222-333-4444', 'Denver', 'Colorado', 'USA'),
-('707 Ash Street', 'Apt 401', 'Islands', '43210', '888-999-0000', 'Honolulu', 'Hawaii', 'USA');
+('707 Ash Street', 'Apt 401', 'Islands', '43210', '888-999-0000', 'Honolulu', 'Hawaii', 'USA'),
+("123 Main Street", "", "Downtown", "12345", "123-456-7890", "New York", "New York", "USA"),
+("456 Elm Street", "Apt 101", "Midtown", "54321", "987-654-3210", "Los Angeles", "California", "USA"),
+("789 Oak Avenue", "Suite 201", "Uptown", "67890", "111-222-3333", "Chicago", "Illinois", "USA"),
+("101 Pine Road", "", "Suburbia", "09876", "444-555-6666", "Houston", "Texas", "USA"),
+("202 Maple Lane", "", "Rural", "65432", "777-888-9999", "Phoenix", "Arizona", "USA"),
+("303 Cedar Drive", "Unit 501", "Coastal", "13579", "333-222-1111", "Miami", "Florida", "USA"),
+("404 Birch Court", "", "Hills", "24680", "999-888-7777", "Seattle", "Washington", "USA"),
+("505 Walnut Place", "Suite 301", "Valley", "56789", "666-555-4444", "San Francisco", "California", "USA"),
+("606 Spruce Avenue", "", "Mountains", "98765", "222-333-4444", "Denver", "Colorado", "USA"),
+("707 Ash Street", "Apt 401", "Islands", "43210", "888-999-0000", "Honolulu", "Hawaii", "USA"),
+("808 Pineapple Avenue", "Suite 501", "Beachside", "56789", "777-888-9999", "Los Angeles", "California", "USA"),
+("909 Cherry Lane", "", "Downtown", "12345", "555-444-3333", "New York", "New York", "USA"),
+("1010 Orange Grove", "Apt 201", "Uptown", "54321", "222-333-4444", "Chicago", "Illinois", "USA"),
+("1111 Lemon Boulevard", "", "Midtown", "67890", "111-222-3333", "Houston", "Texas", "USA"),
+("1212 Apple Street", "Suite 301", "Suburbia", "09876", "999-888-7777", "Phoenix", "Arizona", "USA"),
+("1313 Banana Road", "", "Rural", "65432", "666-555-4444", "Miami", "Florida", "USA"),
+("1414 Grape Lane", "Unit 401", "Coastal", "13579", "123-456-7890", "Seattle", "Washington", "USA"),
+("1515 Mango Court", "", "Hills", "24680", "777-888-9999", "San Francisco", "California", "USA"),
+("1616 Pear Place", "Apt 501", "Valley", "56789", "444-555-6666", "Denver", "Colorado", "USA"),
+("1717 Watermelon Avenue", "", "Mountains", "98765", "888-999-0000", "Honolulu", "Hawaii", "USA");
+
 
 -- Insert data into the user table
 INSERT INTO user (first_name, last_name, username, password, email, address_id, role) VALUES
@@ -23,8 +44,8 @@ INSERT INTO user (first_name, last_name, username, password, email, address_id, 
 ('Emma', 'Martinez', 'emmam', 'password8', 'emma.m@example.com', 8, 'customer'),
 ('Daniel', 'Anderson', 'danield', 'password9', 'daniel.a@example.com', 9, 'manager'),
 ('Sophia', 'Hernandez', 'sophiah', 'password10', 'sophia.h@example.com', 10, 'customer'),
-('Asal', 'Khaef', 'asal', 'password11', 'asal.kh@example.com', 10, 'manager'),
-('Amirali', 'Lotfi', 'amirali', 'password12', 'amirali.l@example.com', 10, 'manager');
+('Asal', 'Khaef', 'asal', 'password11', 'asal.kh@example.com', 11, 'manager'),
+('Amirali', 'Lotfi', 'amirali', 'password12', 'amirali.l@example.com', 12, 'manager');
 
 -- Insert data into the film table
 INSERT INTO film (title, description, release_date, rate, rent_cost_per_day, penalty_cost_per_day) VALUES
