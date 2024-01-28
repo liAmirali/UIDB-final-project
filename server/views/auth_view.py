@@ -34,8 +34,8 @@ def get_login_credentials(role):
     username = input("Username: ")
     password = input("Password: ")
 
-    db_cursor.execute(f"SELECT * FROM user WHERE role='{
-        role}' AND username='{username}' AND password='{password}'")
+    db_cursor.execute(
+        f"SELECT * FROM user WHERE role='{role}' AND username='{username}' AND password='{password}'")
 
     foundUser = db_cursor.fetchone()
 
