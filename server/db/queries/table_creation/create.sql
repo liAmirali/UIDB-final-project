@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS user(
 	user_id INT PRIMARY KEY auto_increment,
     first_name VARCHAR(250),
     last_name VARCHAR(250),
-    username VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
     address_id INT,
     role ENUM ('customer', 'manager'),
     foreign key (address_id) references address(address_id)
