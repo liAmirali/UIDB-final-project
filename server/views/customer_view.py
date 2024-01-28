@@ -9,12 +9,12 @@ def show_customer_screen():
         clear_screen()
         print_header("Customer View")
 
-        print(" 1. View all shops")
+        print(" 1. All shops")
         print(" 2. View and Edit profile")
-        print(" 3. View films by category")
+        print(" 3. Films by category")
         print(" 4. Search Films")
         print(" 5. Rental Details")
-        print(" 6. View Rental History")
+        print(" 6. Rental History")
         print(" 7. Reserve a Film")
         print(" 8. Rent a Film")
         print(" 9. Return a Rented DVD")
@@ -33,6 +33,10 @@ def show_customer_screen():
             search_films()
         elif option == "5":
             get_rental_details()
+        elif option == "6":
+            get_rental_history()
+        elif option == "7":
+            reserve_film()
         elif option == "12":
             break
 
@@ -230,14 +234,30 @@ def get_rental_details():
 
     wait_on_enter()
 
+
 def get_rental_history():
     clear_screen()
     print_header("Rental History")
 
     logged_in_user_id = app.logged_in_user.user_id
-    db_cursor.execute(f"SELECT * FROM rental WHERE customer_id={logged_in_user_id}")
+    db_cursor.execute(
+        f"SELECT * FROM rental WHERE customer_id={logged_in_user_id}")
     history = db_cursor.fetchall()
 
     print(history)
+
+    wait_on_enter()
+
+
+def reserve_film():
+    clear_screen()
+    print_header("Reserve a Film")
+
+    selected_film_id = input("Please enter the film ID you want to reserve: ")
+    db_cursor.execute(
+        f"SELECT count(*) FROM rental JOIN dvd USING (dvd_id) JOIN film USING (film_id) WHERE film_id={selected_film_id}")
+    result = db_cursor.fetchone()
+
+    print(result)
 
     wait_on_enter()
