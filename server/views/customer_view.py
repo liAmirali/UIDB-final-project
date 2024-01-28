@@ -29,6 +29,8 @@ def show_customer_screen():
             get_user_profile()
         elif option == "3":
             view_film_list()
+        elif option == "4":
+            search_films()
         elif option == "12":
             break
 
@@ -183,12 +185,12 @@ def search_films():
 
     option = read_menu_opt()
 
-    search_query = print("Enter your search query: ")
+    search_query = input("Enter your search query: ")
     if option == "1":
         query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{
             search_query}%' OR last_name LIKE '%{search_query}%'"
     elif option == "2":
-        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category LIKE '%{
+        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category_name LIKE '%{
             search_query}%'"
     elif option == "3":
         query = f"SELECT * FROM film WHERE title LIKE '%{search_query}%'"
@@ -196,7 +198,7 @@ def search_films():
         query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{
             search_query}%'"
     elif option == "5":
-        query = f"SELECT * FROM film YEAR(release_date) = {search_query}"
+        query = f"SELECT * FROM film WHERE YEAR(release_date) = {search_query}"
     else:
         print_error("Invalid option")
         wait_on_enter()
