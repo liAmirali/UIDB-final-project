@@ -11,4 +11,4 @@ JOIN
     shop s ON d.shop_id = s.shop_id
 WHERE
     s.manager_id = 3
-    AND r.status = "checking"
+    AND r.accepted is NULL;

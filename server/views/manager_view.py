@@ -8,20 +8,21 @@ def show_manager_screen():
         clear_screen()
         print_header("Manager Page")
 
-        print("1. Show customer list")
-        print("2. Show rental detail of a film")
-        print("3. Show active rentals")
-        print("4. Show rent requests")
-        print("5. show reserve requests")
-        print("6. show shop info")
-        print("7. Edit shop info")
-        print("8. View all films")
-        print("9. View all films by category")
+        print(" 1. Show customer list")
+        print(" 2. Show rental detail of a film")
+        print(" 3. Show active rentals")
+        print(" 4. Show rent requests")
+        print(" 5. Show reserve requests")
+        print(" 6. Show shop info")
+        print(" 7. Edit shop info")
+        print(" 8. View all films")
+        print(" 9. View all films by category")
         print("10. Search on films")
         print("11. Payment details")
         print("12. BestSeller films")
 
         option = read_menu_opt()
+
         if option == "1":
             show_customer_list()
         elif option == "2":
@@ -31,13 +32,13 @@ def show_manager_screen():
         elif option == "4":
             show_rent_requests()
         elif option == "5":
-            pass
+            show_reserve_requests()
         elif option == "6":
-            pass
+            show_shop_info()
         elif option == "7":
             pass
         elif option == "8":
-            pass
+            view_all_films()
         elif option == "9":
             pass
         elif option == "10":
@@ -51,6 +52,9 @@ def show_manager_screen():
 
 
 def show_customer_list():
+
+    clear_screen()
+    print_header("Customer List")
 
     manager_id = 6
     # manager_id = app.logged_in_user.user_id
@@ -70,6 +74,9 @@ def show_customer_list():
 
 
 def show_rental_detail():
+
+    clear_screen()
+    print_header("Rental Detail")
 
     film_id = input("Enter film_id:")
 
@@ -94,6 +101,9 @@ def show_rental_detail():
 
 def show_active_rentals():
 
+    clear_screen()
+    print_header("Active Rental")
+
     manager_id = 6
     # manager_id = app.logged_in_user.user_id
 
@@ -103,13 +113,13 @@ def show_active_rentals():
     r.dvd_id,
     r.rental_date,
     r.due_date
-FROM
-    rental r
-JOIN
-    dvd d ON r.dvd_id = d.dvd_id
-JOIN
-    shop s ON d.shop_id = s.shop_id
-WHERE
+    FROM
+        rental r
+    JOIN
+        dvd d ON r.dvd_id = d.dvd_id
+    JOIN
+        shop s ON d.shop_id = s.shop_id
+    WHERE
     s.manager_id = {manager_id}
     AND r.status = "accepted" AND r.return_date IS NULL"""
 
@@ -121,6 +131,9 @@ WHERE
 
 
 def show_rent_requests():
+
+    clear_screen()
+    print_header("Rent Requests")
 
     manager_id = 6
     # manager_id = app.logged_in_user.user_id
@@ -148,5 +161,103 @@ def show_rent_requests():
     print(foundlist)
     wait_on_enter()
 
-# def show_reserve_requests():
-    
+
+def show_reserve_requests():
+
+    clear_screen()
+    print_header("Reserve Requests")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f""" SELECT
+    r.reserve_id,
+    r.customer_id,
+    r.dvd_id,
+    r.created_at
+    FROM
+        reserve r
+    JOIN
+        dvd d ON r.dvd_id = d.dvd_id
+    JOIN
+        shop s ON d.shop_id = s.shop_id
+    WHERE
+        s.manager_id = {manager_id}
+        AND r.accepted is NULL """
+
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print(foundlist)
+    wait_on_enter()
+
+
+def show_shop_info():
+
+    clear_screen()
+    print_header("Shop info")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f"""SELECT
+    s.shop_id,
+    s.shop_name,
+    u.user_id AS manager_id,
+    u.first_name AS manager_first_name,
+    u.last_name AS manager_last_name,
+    a.address,
+    a.address2,
+    a.district,
+    a.postal_code,
+    a.phone,
+    a.location,
+    a.city,
+    a.country
+    FROM
+        shop s
+    JOIN
+        user u ON s.manager_id = u.user_id
+    JOIN
+        address a ON s.address_id = a.address_id
+    WHERE
+    s.manager_id = {manager_id}"""
+
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print(foundlist)
+    wait_on_enter()
+
+
+def view_all_films():
+
+    clear_screen()
+    print_header("All Film")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f"""SELECT
+    f.title AS film_title,
+    f.description,
+    f.release_date,
+    f.rate,
+    f.rent_cost_per_day,
+    f.penalty_cost_per_day
+    FROM
+        film f
+    JOIN
+        dvd d ON f.film_id = d.film_id
+    JOIN
+        shop s ON d.shop_id = s.shop_id
+    WHERE
+        s.manager_id = 3
+    ORDER BY
+        f.rate DESC"""
+
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print(foundlist)
+    wait_on_enter()
