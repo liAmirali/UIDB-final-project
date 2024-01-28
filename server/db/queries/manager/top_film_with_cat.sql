@@ -12,10 +12,6 @@ JOIN
 JOIN
     category c ON fc.category_id = c.category_id
 JOIN
-    film_language fl ON f.film_id = fl.film_id
-JOIN
-    language l ON fl.language_id = l.language_id
-JOIN
     dvd d ON f.film_id = d.film_id
 JOIN
     shop s ON d.shop_id = s.shop_id
@@ -24,4 +20,3 @@ WHERE
     AND c.category_name = 'Action'
 ORDER BY
     f.rate DESC
-LIMIT 1;
