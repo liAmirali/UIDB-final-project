@@ -31,6 +31,8 @@ def show_customer_screen():
             view_film_list()
         elif option == "4":
             search_films()
+        elif option == "5":
+            get_rental_details()
         elif option == "12":
             break
 
@@ -209,5 +211,33 @@ def search_films():
 
     for f in films:
         print(f)
+
+    wait_on_enter()
+
+
+def get_rental_details():
+    clear_screen()
+    print_header("Rental Details")
+
+    db_cursor.execute("""
+              SELECT film_id, title, AVG(rental.rate), COUNT(dvd_id)
+              FROM rental JOIN dvd USING (dvd_id) JOIN film USING (film_id)
+              GROUP BY film_id""")
+    rental_details = db_cursor.fetchall()
+
+    for rental in rental_details:
+        print(rental)
+
+    wait_on_enter()
+
+def get_rental_history():
+    clear_screen()
+    print_header("Rental History")
+
+    logged_in_user_id = app.logged_in_user.user_id
+    db_cursor.execute(f"SELECT * FROM rental WHERE customer_id={logged_in_user_id}")
+    history = db_cursor.fetchall()
+
+    print(history)
 
     wait_on_enter()
