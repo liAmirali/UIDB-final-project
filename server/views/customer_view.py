@@ -12,7 +12,15 @@ def show_customer_screen():
         print("1. View all shops")
         print("2. View and Edit profile")
         print("3. View films by category")
-        print("4. Logout")
+        print("4. Search Films")
+        print("5. Rental Details")
+        print("6. View Rental History")
+        print("7. Reserve a Film")
+        print("8. Rent a Film")
+        print("9. Return a Rented DVD")
+        print("10. Active Rents")
+        print("11. Payment Information")
+        print("12. Logout")
 
         option = read_menu_opt()
         if option == "1":
@@ -20,8 +28,8 @@ def show_customer_screen():
         elif option == "2":
             get_user_profile()
         elif option == "3":
-            pass
-        elif option == "4":
+            view_film_list()
+        elif option == "12":
             break
 
 
@@ -117,7 +125,7 @@ def show_edit_profile_screen():
         country = {'"' + country + '"' if country != "" else 'country'}
     WHERE
         address_id = {logged_in_user.address_id}"""
-    
+
     print("update_address_query:", update_address_query)
 
     try:
@@ -130,11 +138,34 @@ def show_edit_profile_screen():
             f"SELECT * FROM user WHERE user_id={logged_in_user.user_id}")
         foundUser = db_cursor.fetchone()
         user = User(foundUser)
+        app.set_logged_in_user(user)
 
         print_success("User was edited successfully.")
     except Exception as e:
         db_conn.rollback()
 
         print_error(f"Error in updating user info: {str(e)}")
+
+    wait_on_enter()
+
+
+def view_film_list():
+    clear_screen()
+    print_header("Film List")
+
+    print("--- Categories ---")
+    category_list_insert = "SELECT * FROM category"
+    db_cursor.execute(category_list_insert)
+    cat_list = db_cursor.fetchall()
+    for category in cat_list:
+        print(category)
+
+    selected_category_id = input("Input the category ID: ")
+    db_cursor.execute(
+        f"SELECT * FROM film WHERE category_id={selected_category_id} ORDER BY rate")
+    films = db_cursor.fetchall()
+
+    for film in films:
+        print(film)
 
     wait_on_enter()
