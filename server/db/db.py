@@ -1,15 +1,16 @@
 from db.config import DB_NAME, DB_USER, DB_PASS
-from src.app import app
 
 import mysql.connector
 
-mydb = mysql.connector.connect(
-    host="localhost",
-    user=DB_USER,
-    passwd=DB_PASS
-)
+my_db = None
+db_cursor = None
 
-print(mydb)
-my_cursor = mydb.cursor()
+if my_db == None or db_cursor == None:
+    my_db = mysql.connector.connect(
+        host="localhost",
+        user=DB_USER,
+        passwd=DB_PASS,
+        database=DB_NAME
+    )
 
-my_cursor.execute("CREATE DATABASE dbproj")
+    db_cursor = my_db.cursor()

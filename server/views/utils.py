@@ -13,7 +13,7 @@ def clear_screen():
 
 def read_menu_opt():
     while True:
-        option = input(" > Please enter menu option: ")
+        option = input("\n > Please enter menu option: ")
         option = option.strip()
         if option == "":
             continue
@@ -34,6 +34,7 @@ def print_header(text):
     
 
 def print_error(text):
-    print("\033[91m {}\033[00m".format(text))
+    print("\033[91m{}\033[00m".format(text))
 
-
+def print_success(text):
+    print("\033[92m{}\033[00m".format(text))

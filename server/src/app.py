@@ -1,15 +1,12 @@
-class User:
-    def __init__(self, user_id, username, role, first_name, last_name, email):
-        self.user_id = user_id
-        self.username = username
-        self.role = role
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-
+from models.user import User
 class App:
-    def __init__(self):
-        self.logged_in_user = None
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.logged_in_user = None
+        return cls._instance
 
     def set_logged_in_user(self, user: User):
         self.logged_in_user = user
