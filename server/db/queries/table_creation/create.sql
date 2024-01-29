@@ -129,35 +129,26 @@ CREATE TABLE IF NOT EXISTS film_language(
 
 -- trigger for delay condition and active rent for same dvd
 DELIMITER //
-CREATE TRIGGER on_before_rent_insert
+CREATE TRIGGER check_maximum_delay
 BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
-    declare delay_count int;
-	declare active_rent_count int;
+    DECLARE delay_count INT;
+	DECLARE active_rent_count INT;
 
     SELECT COUNT(*) INTO delay_count
     FROM rental
     WHERE customer_id = NEW.customer_id 
     AND (
-        (return_date IS NULL AND NOW() > due_date) 
+        (status = 'accepted' AND return_date IS NULL AND NOW() > due_date) 
         OR 
         (return_date IS NOT NULL AND return_date > due_date)
     );
 
-    IF delay_count > 10 THEN
+    IF delay_count >= 10 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'TOO MANY DELAYS FOR THIS CUSTOMER';
+        SET MESSAGE_TEXT = 'Too many delays for this customer.';
     END IF;
-
-    select count(*) INTO active_rent_count
-    from rental
-    where dvd_id = NEW.dvd_id AND return_date is null;
-	
-    IF active_rent_count > 1 THEN
-		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'ALREADY RENTED';
-    END if;
 END;
 //
 
@@ -171,9 +162,9 @@ BEGIN
     FROM shop
     WHERE manager_id = NEW.manager_id;
 
-    IF shop_count > 2 THEN
+    IF shop_count >= 2 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Manager cannot be assigned to more than 2 shops';
+        SET MESSAGE_TEXT = 'Manager cannot be assigned to more than 2 shops.';
     END IF;
 END;
 //
@@ -182,18 +173,18 @@ CREATE TRIGGER check_rent_count_limit
 BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
-    DECLARE dvd_count INT;
+    DECLARE active_rent_count INT;
 
-    SELECT COUNT(*) INTO dvd_count
-    FROM rental r
-    JOIN dvd d ON r.dvd_id = d.dvd_id
-    WHERE r.customer_id = NEW.customer_id
-      AND d.shop_id = (SELECT shop_id FROM dvd WHERE dvd_id = NEW.dvd_id)
-      AND r.return_date IS NULL;
+    SELECT COUNT(*) INTO active_rent_count
+    FROM rental
+        JOIN dvd USING (dvd_id)
+    WHERE customer_id = NEW.customer_id
+        AND shop_id = (SELECT shop_id FROM dvd WHERE dvd_id = NEW.dvd_id)
+        AND status='accepted' AND return_date IS NULL;
 
-    IF dvd_count > 3 THEN
+    IF active_rent_count >= 3 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Customer cannot rent more than 3 DVDs from the same shop simultaneously';
+        SET MESSAGE_TEXT = 'Customer cannot rent more than 3 DVDs from the same shop simultaneously.';
     END IF;
 END;
 //
@@ -204,7 +195,7 @@ FOR EACH ROW
 BEGIN
     IF TIMESTAMPDIFF(DAY, NEW.rental_date, NEW.due_date) > 14 OR TIMESTAMPDIFF(DAY, NEW.rental_date, NEW.due_date) < 1 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Rental duration must be between 1 and 14 days';
+        SET MESSAGE_TEXT = 'Rental duration must be between 1 and 14 days.';
     END IF;
 END;
 //
@@ -216,11 +207,11 @@ BEGIN
     declare active_rent_count int;
     select count(*) INTO active_rent_count
     from rental
-    where dvd_id = NEW.dvd_id AND return_date is null;
+    where dvd_id = NEW.dvd_id AND status='accepted' AND return_date is null;
 	
-    IF active_rent_count > 1 THEN
+    IF active_rent_count > 0 THEN
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'ALREADY RENTED';
+        SET MESSAGE_TEXT = 'The DVD is already rented.';
     END if;
 END;
 //
@@ -231,15 +222,13 @@ FOR EACH ROW
 BEGIN
     DECLARE reserve_accepted BOOLEAN;
     
-    -- Check if the dvd_id being inserted is in reserve with accepted = true
     SELECT accepted INTO reserve_accepted 
     FROM reserve 
-    WHERE dvd_id = NEW.dvd_id AND accepted = TRUE;
+    WHERE dvd_id = NEW.dvd_id AND accepted = 1 AND expired = 0;
     
-    -- If found, prevent insertion
     IF reserve_accepted THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Cannot add DVD with accepted reservation into rental';
+        SET MESSAGE_TEXT = 'Cannot rent a reserved DVD.';
     END IF;
 END;
 //

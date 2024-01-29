@@ -15,10 +15,11 @@ DROP TABLE IF EXISTS `language`;
 DROP TABLE IF EXISTS `film_category`;
 DROP TABLE IF EXISTS `film_language`;
 
-DROP TRIGGER IF EXISTS `on_before_rent_insert`;
+DROP TRIGGER IF EXISTS `check_maximum_delay`;
 DROP TRIGGER IF EXISTS `check_manager_limit`;
 DROP TRIGGER IF EXISTS `check_rent_count_limit`;
 DROP TRIGGER IF EXISTS `check_rental_duration`;
+DROP TRIGGER IF EXISTS `active_rent_check`;
 DROP TRIGGER IF EXISTS  `no_rent_reserved`;
 
 SET FOREIGN_KEY_CHECKS = 1;
