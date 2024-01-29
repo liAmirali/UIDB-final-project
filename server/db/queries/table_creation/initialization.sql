@@ -48,17 +48,17 @@ INSERT INTO user (first_name, last_name, username, password, email, address_id, 
 ('Amirali', 'Lotfi', 'amirali', 'password12', 'amirali.l@example.com', 12, 'manager');
 
 -- Insert data into the film table
-INSERT INTO film (title, description, release_date, rate, rent_cost_per_day, penalty_cost_per_day) VALUES
-('The Matrix', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', '1999-03-31', 5, 3, 4),
+INSERT INTO film (title, description, release_date, rent_cost_per_day, penalty_cost_per_day) VALUES
+('The Matrix', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', '1999-03-31', 3, 4),
 ('Inception', 'A thief who enters the dreams of others to steal secrets from their subconscious.', '2010-07-16', 4, 2, 3),
-('The Shawshank Redemption', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', '1994-10-14', 5, 2, 3),
-('Pulp Fiction', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', '1994-10-14', 4, 2, 3),
-('The Dark Knight', 'When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', '2008-07-18', 5, 2, 3),
-('Fight Club', 'An insomniac office worker and a devil-may-care soapmaker form an underground fight club that evolves into something much, much more.', '1999-10-15', 4, 2, 3),
-('Forrest Gump', 'The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate, and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood sweetheart.', '1994-07-06', 5, 2, 3),
-('The Godfather', 'An organized crime dynasty\'s aging patriarch transfers control of his clandestine empire to his reluctant son.', '1972-03-24', 5, 2, 3),
-('The Godfather: Part II', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', '1974-12-20', 5, 2, 3),
-('Schindler\'s List', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', '1993-12-15', 5, 2, 3);
+('The Shawshank Redemption', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', '1994-10-14', 2, 3),
+('Pulp Fiction', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', '1994-10-14', 2, 3),
+('The Dark Knight', 'When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', '2008-07-18', 2, 3),
+('Fight Club', 'An insomniac office worker and a devil-may-care soapmaker form an underground fight club that evolves into something much, much more.', '1999-10-15', 2, 3),
+('Forrest Gump', 'The presidencies of Kennedy and Johnson, the events of Vietnam, Watergate, and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood sweetheart.', '1994-07-06', 2, 3),
+('The Godfather', 'An organized crime dynasty\'s aging patriarch transfers control of his clandestine empire to his reluctant son.', '1972-03-24', 2, 3),
+('The Godfather: Part II', 'The early life and career of Vito Corleone in 1920s New York City is portrayed, while his son, Michael, expands and tightens his grip on the family crime syndicate.', '1974-12-20', 2, 3),
+('Schindler\'s List', 'In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.', '1993-12-15', 2, 3);
 
 -- Insert data into the shop table
 INSERT INTO shop (shop_name, manager_id, address_id) VALUES
@@ -151,13 +151,13 @@ INSERT INTO dvd (film_id, shop_id, production_date) VALUES
 INSERT INTO reserve (customer_id, dvd_id) VALUES
 (1, 1),
 (2, 2),
-(3, 3),
+(4, 3),
 (4, 4),
 (5, 5),
-(6, 6),
+(5, 6),
 (7, 7),
 (8, 8),
-(9, 9),
+(10, 9),
 (10, 10);
 
 -- Insert data into the rental table
@@ -249,7 +249,15 @@ INSERT INTO film_category (film_id, category_id) VALUES
 (7, 3),
 (8, 4),
 (9, 1),
-(10, 2);
+(10, 2);, '2023-01-09', 18),
+(3, '2023-01-10', 20),
+(4, '2023-01-11', 22),
+(5, '2023-01-12', 24),
+(6, '2023-01-13', 26),
+(7, '2023-01-14', 28),
+(8, '2023-01-15', 30),
+(9, '2023-01-16', 32),
+(10, '2023-01-17', 34);
 
 -- Insert data into the film_language table
 INSERT INTO film_language (film_id, language_id) VALUES

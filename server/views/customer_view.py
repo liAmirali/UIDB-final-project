@@ -1,5 +1,7 @@
 import datetime
 
+from tabulate import tabulate
+
 from views.utils import *
 from db.db import db_cursor, db_conn
 from src.app import app
@@ -55,12 +57,13 @@ def get_all_shops():
     clear_screen()
     print_header("Shop List")
 
-    db_cursor.execute("SELECT * FROM shop")
+    db_cursor.execute(
+        "SELECT shop_id, shop_name, first_name, last_name, manager_id, address_id FROM shop JOIN user ON shop.manager_id=user.user_id JOIN address USING address_id")
     all_shops = db_cursor.fetchall()
 
-    print("All Shops")
-    for shop in all_shops:
-        print(shop)
+    headers = ["Shop ID", "Shop Name", "Manager First Name",
+               "Manager Last Name", "Manager ID", "Address ID"]
+    print(tabulate(all_shops, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -80,7 +83,9 @@ def get_user_profile():
         wait_on_enter()
         return
     else:
-        print(foundUser)
+        headers = ["User ID", "First Name", "Last Name",
+                   "Username", "Password", "Email", "Address ID", "Role"]
+        print(tabulate([foundUser], headers=headers, tablefmt="pretty"))
 
     edit_confirmation = input("\n\nDo you want to edit? (Y/N): ")
     if edit_confirmation == "Y" or edit_confirmation == "y":
@@ -183,8 +188,9 @@ def view_film_list():
         f"SELECT * FROM film JOIN film_category USING(film_id) WHERE category_id={selected_category_id} ORDER BY rate DESC, title")
     films = db_cursor.fetchall()
 
-    for film in films:
-        print(film)
+    headers = ["Film ID", "Title", "Description", "Release Date",
+               "Rate", "Rent Cost per Day", "Penalty Cost per Day"]
+    print(tabulate(films, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -203,13 +209,16 @@ def search_films():
 
     search_query = input("Enter your search query: ")
     if option == "1":
-        query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{search_query}%' OR last_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{
+            search_query}%' OR last_name LIKE '%{search_query}%'"
     elif option == "2":
-        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category_name LIKE '%{
+            search_query}%'"
     elif option == "3":
         query = f"SELECT * FROM film WHERE title LIKE '%{search_query}%'"
     elif option == "4":
-        query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{
+            search_query}%'"
     elif option == "5":
         query = f"SELECT * FROM film WHERE YEAR(release_date) = {search_query}"
     else:
@@ -220,8 +229,8 @@ def search_films():
     db_cursor.execute(query)
     films = db_cursor.fetchall()
 
-    for f in films:
-        print(f)
+    headers = ["Film ID", "Title", "Description", "Release Date", "Rate", "Rent Cost per Day", "Penalty Cost per Day"]
+    print(tabulate(films, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -236,8 +245,8 @@ def get_rental_details():
               GROUP BY film_id""")
     rental_details = db_cursor.fetchall()
 
-    for rental in rental_details:
-        print(rental)
+    headers = ["Film ID", "Title", "Average Rate", "Number of DVDs"]
+    print(tabulate(rental_details, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -251,7 +260,8 @@ def get_rental_history():
         f"SELECT * FROM rental WHERE customer_id={logged_in_user_id}")
     history = db_cursor.fetchall()
 
-    print(history)
+    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date", "Return Date", "Rate", "Status"]
+    print(tabulate(history, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -281,9 +291,8 @@ def reserve_film():
     if result is None or len(result) == 0:
         print_error("No DVDs found for this film.")
     else:
-        print("Found DVDs (DVD ID, Shop Name):")
-        for dvd in result:
-            print(dvd)
+        headers = ["DVD ID", "Shop Name"]
+        print(tabulate(result, headers=headers, tablefmt="pretty"))
 
         selected_dvd_id = input("Select a DVD ID: ")
         found = False
@@ -338,9 +347,8 @@ def rent_dvd():
     if result is None or len(result) == 0:
         print_error("No DVDs found for this film.")
     else:
-        print("Found DVDs (DVD ID, Shop Name):")
-        for dvd in result:
-            print(dvd)
+        headers = ["DVD ID", "Shop Name"]
+        print(tabulate(result, headers=headers, tablefmt="pretty"))
 
         selected_dvd_id = input("\nSelect a DVD ID: ")
         found = False
@@ -385,9 +393,8 @@ def return_dvd():
     if active_rents is None or len(active_rents) == 0:
         print_error("No active rent!")
     else:
-        print("Active rents (ID, DVD ID, Shop Name, Rented At, Due Date, Remaining Time, Cost per day, Penalty per day):")
-        for dvd in active_rents:
-            print(dvd)
+        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At", "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
+        print(tabulate(active_rents, headers=headers, tablefmt="pretty"))
 
         selected_rental_id = input(
             "\nPlease enter the Rental ID you want to return: ")
@@ -458,9 +465,8 @@ def show_active_rents():
     if active_rents is None or len(active_rents) == 0:
         print_error("No active rents!")
     else:
-        print("(Rental ID, DVD ID, Shop Name, Rented At, Due Date, Remaining Time, Cost per day, Penalty per day):")
-        for dvd in active_rents:
-            print(dvd)
+        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At", "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
+        print(tabulate(active_rents, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -471,9 +477,11 @@ def show_payment_information():
 
     customer_id = app.logged_in_user.user_id
 
-    db_cursor.execute(f"SELECT * FROM payment JOIN rental USING (rental_id) WHERE customer_id={customer_id}")
+    db_cursor.execute(
+        f"SELECT * FROM payment JOIN rental USING (rental_id) WHERE customer_id={customer_id}")
     result = db_cursor.fetchall()
 
-    print(result)
+    headers = ["Payment ID", "Rental ID", "Amount"]
+    print(tabulate(result, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
