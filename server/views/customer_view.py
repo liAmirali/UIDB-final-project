@@ -37,6 +37,8 @@ def show_customer_screen():
             get_rental_history()
         elif option == "7":
             reserve_film()
+        elif option == '8':
+            rent_dvd()
         elif option == "12":
             break
 
@@ -296,5 +298,61 @@ def reserve_film():
             except Exception as e:
                 db_conn.rollback()
                 print_error(f"Error in reserving: {str(e)}")
+
+    wait_on_enter()
+
+def rent_dvd():
+    clear_screen()
+    print_header("Reserve a Film")
+
+    logged_in_user_id = app.logged_in_user.user_id
+
+    selected_film_id = input("Please enter the film ID you want to rent: ")
+    db_cursor.execute(
+        f"""SELECT dvd_id, shop_name
+        FROM dvd
+            JOIN film USING (film_id)
+            JOIN shop USING (shop_id)
+        WHERE film_id={selected_film_id}
+        EXCEPT
+        SELECT dvd_id, shop_name
+        FROM reserve
+            JOIN dvd USING (dvd_id)
+            JOIN shop USING (shop_id)
+        WHERE film_id={selected_film_id} AND expired=0
+        EXCEPT
+        SELECT dvd_id, shop_name
+        FROM rental
+            JOIN dvd USING (dvd_id)
+            JOIN shop USING (shop_id)
+        WHERE status='accepted' AND return_date IS NULL
+        """)
+    
+    result = db_cursor.fetchall()
+    if result is None or len(result) == 0:
+        print_error("No DVDs found for this film.")
+    else:
+        print("Found DVDs (DVD ID, Shop Name):")
+        for dvd in result:
+            print(dvd)
+
+        selected_dvd_id = input("\nSelect a DVD ID: ")
+        found = False
+        for res in result:
+            if str(res[0]) == selected_dvd_id:
+                found = True
+                break
+        if not found:
+            print_error("Your selected DVD is not available.")
+        else:
+            try:
+                db_cursor.execute("INSERT INTO rental (customer_id, dvd_id) VALUES (%s, %s)", (
+                    logged_in_user_id, int(selected_dvd_id)))
+
+                db_conn.commit()
+                print_success("DVD was rented successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error in renting: {str(e)}")
 
     wait_on_enter()
