@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS reserve(
     created_at timestamp not null default current_timestamp,
     accepted BOOLEAN DEFAULT NULL,
     check_date timestamp default null,
+    expired BOOLEAN DEFAULT FALSE,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
 );
