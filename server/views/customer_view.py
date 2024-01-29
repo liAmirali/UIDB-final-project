@@ -203,16 +203,13 @@ def search_films():
 
     search_query = input("Enter your search query: ")
     if option == "1":
-        query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{
-            search_query}%' OR last_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE first_name LIKE '%{search_query}%' OR last_name LIKE '%{search_query}%'"
     elif option == "2":
-        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category_name LIKE '%{
-            search_query}%'"
+        query = f"SELECT * FROM film JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE category_name LIKE '%{search_query}%'"
     elif option == "3":
         query = f"SELECT * FROM film WHERE title LIKE '%{search_query}%'"
     elif option == "4":
-        query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{
-            search_query}%'"
+        query = f"SELECT * FROM film JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE language_name LIKE '%{search_query}%'"
     elif option == "5":
         query = f"SELECT * FROM film WHERE YEAR(release_date) = {search_query}"
     else:

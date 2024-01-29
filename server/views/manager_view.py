@@ -44,7 +44,7 @@ def show_manager_screen():
         elif option == "10":
             pass
         elif option == "11":
-            pass
+            show_payment_details()
         elif option == "12":
             pass
         elif option == "13":
@@ -252,9 +252,107 @@ def view_all_films():
     JOIN
         shop s ON d.shop_id = s.shop_id
     WHERE
-        s.manager_id = 3
+        s.manager_id = {manager_id}
     ORDER BY
         f.rate DESC"""
+
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print(foundlist)
+    wait_on_enter()
+
+
+def show_payment_details():
+    clear_screen()
+    print_header("Payment Details")
+
+    print("1. Show all payments")
+    print("2. Show payments of specific customer")
+    print("3. Show payments of specific film")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+    option = read_menu_opt()
+
+    if option == "1":
+
+        sql_query = f"""SELECT
+        p.payment_id,
+        p.rental_id,
+        f.title,
+        p.payment_date,
+        p.amount,
+        r.customer_id,
+        r.dvd_id,
+        r.return_date,
+        s.shop_name
+        FROM
+            payment p
+        JOIN
+            rental r ON p.rental_id = r.rental_id
+        JOIN
+            dvd d ON r.dvd_id = d.dvd_id
+        JOIN
+            shop s ON d.shop_id = s.shop_id
+        JOIN
+            film f ON d.film_id = f.film_id
+        WHERE
+        s.manager_id = {manager_id}"""
+
+    elif option == "2":
+
+        customer_id = input("Enter customer ID:")  # 2
+
+        sql_query = f"""SELECT
+        p.payment_id,
+        p.rental_id,
+        f.title,
+        p.payment_date,
+        p.amount,
+        r.customer_id,
+        r.dvd_id,
+        r.return_date,
+        s.shop_name
+        FROM
+            payment p
+        JOIN
+            rental r ON p.rental_id = r.rental_id
+        JOIN
+            dvd d ON r.dvd_id = d.dvd_id
+        JOIN
+            shop s ON d.shop_id = s.shop_id
+        JOIN
+            film f ON d.film_id = f.film_id
+        WHERE
+            s.manager_id = {manager_id} AND r.customer_id = {customer_id}"""
+
+    elif option == "3":
+        film_id = input("Enter film ID:")  # 10
+
+        sql_query = f"""SELECT
+        p.payment_id,
+        p.rental_id,
+        f.title,
+        f.film_id,
+        p.payment_date,
+        p.amount,
+        r.customer_id,
+        r.dvd_id,
+        r.return_date,
+        s.shop_name
+        FROM
+            payment p
+        JOIN
+            rental r ON p.rental_id = r.rental_id
+        JOIN
+            dvd d ON r.dvd_id = d.dvd_id
+        JOIN
+            shop s ON d.shop_id = s.shop_id
+        JOIN
+            film f ON d.film_id = f.film_id
+        WHERE
+            s.manager_id = {manager_id} AND f.film_id = {film_id}"""
 
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
