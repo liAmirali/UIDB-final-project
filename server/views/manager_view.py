@@ -1,3 +1,4 @@
+from models.user import User
 from views.utils import *
 from src.app import app
 from db.db import db_conn, db_cursor
@@ -20,6 +21,7 @@ def show_manager_screen():
         print("10. Search on films")
         print("11. Payment details")
         print("12. BestSeller films")
+        print("13. Exit")
 
         option = read_menu_opt()
 
@@ -36,11 +38,11 @@ def show_manager_screen():
         elif option == "6":
             show_shop_info()
         elif option == "7":
-            pass
+            edit_shop_info()  # TODO: fix!
         elif option == "8":
             view_all_films()
         elif option == "9":
-            pass
+            show_films_by_cat()
         elif option == "10":
             pass
         elif option == "11":
@@ -230,6 +232,87 @@ def show_shop_info():
     wait_on_enter()
 
 
+def edit_shop_info():
+    clear_screen()
+    print_header("Shop Info Edit")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f"""SELECT shop_id, shop_name, address_id FROM shop WHERE manager_id = {manager_id}"""
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print("--- Your shops ---")
+    for shop in foundlist:
+        print(shop)
+
+    shop_id = input("Enter the shop_id: ")
+
+    for shop in foundlist:
+        if shop[0] == shop_id:
+            address_id = shop[2]
+
+    print("* Hit enter to keep the old value *")
+
+    print("\n --- Shop Information ---")
+
+    shop_name = input("Shop_name: ")
+
+    print("\n --- Address ---")
+
+    address = input("Address: ")
+    address2 = input("Address 2: ")
+    district = input("District: ")
+    postal_code = input("Postal Code: ")
+    phone = input("Phone: ")
+    location = input("Location: ")
+    city = input("City: ")
+    country = input("Country: ")
+
+    update_shop_query = f"""UPDATE user
+    SET
+        shop_name = {'"' + shop_name + '"' if shop_name != "" else 'shop_name'}
+    WHERE
+        shop_id = {shop_id}"""
+
+    update_address_query = f"""UPDATE address
+    SET
+        address = {'"' + address + '"' if address != "" else 'address'},
+        address2 = {'"' + address2 + '"' if address2 != "" else 'address2'},
+        district = {'"' + district + '"' if district != "" else 'district'},
+        postal_code = {'"' + postal_code +
+                       '"' if postal_code != "" else 'postal_code'},
+        phone = {'"' + phone + '"' if phone != "" else 'phone'},
+        location = {'"' + location + '"' if location != "" else 'location'},
+        city = {'"' + city + '"' if city != "" else 'city'},
+        country = {'"' + country + '"' if country != "" else 'country'}
+    WHERE
+        address_id = {address_id}"""
+
+    print("update_address_query:", update_address_query)
+
+    try:
+        db_cursor.execute(update_shop_query)
+        db_cursor.execute(update_address_query)
+
+        db_conn.commit()
+
+        db_cursor.execute(
+            f"SELECT * FROM user WHERE user_id={logged_in_user.user_id}")
+        foundUser = db_cursor.fetchone()
+        user = User(foundUser)
+        app.set_logged_in_user(user)
+
+        print_success("Shop was edited successfully.")
+    except Exception as e:
+        db_conn.rollback()
+
+        print_error(f"Error in updating shop info: {str(e)}")
+
+    wait_on_enter()
+
+
 def view_all_films():
 
     clear_screen()
@@ -358,4 +441,45 @@ def show_payment_details():
     foundlist = db_cursor.fetchall()
 
     print(foundlist)
+    wait_on_enter()
+
+
+def show_films_by_cat():
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+    sql_query = f"""SELECT s.shop_id, s.shop_name, GROUP_CONCAT(DISTINCT c.category_name) AS categories 
+                        FROM shop s 
+                        JOIN dvd d ON s.shop_id = d.shop_id 
+                        JOIN film f ON d.film_id = f.film_id 
+                        JOIN film_category fc ON f.film_id = fc.film_id 
+                        JOIN category c ON fc.category_id = c.category_id 
+                        WHERE s.manager_id = {manager_id}
+                        GROUP BY s.shop_id, s.shop_name"""
+
+    db_cursor.execute(sql_query)
+    shop_categories = db_cursor.fetchall()
+
+    print("Your shop_ids and available categories are:")
+    for shop in shop_categories:
+        print(shop)
+        # print(f"Shop ID: {shop['shop_id']}, Shop Name: {shop['shop_name']}, Categories: {shop['categories']}")
+
+    print("\n --- Select Shop and Category ---")
+    shop_id = input("Enter shop_id: ")
+    category_name = input("Enter category name: ")
+
+    sql_query = f"""SELECT f.film_id, f.title, f.description, f.release_date
+                    FROM film f
+                    JOIN film_category fc ON f.film_id = fc.film_id
+                    JOIN category c ON fc.category_id = c.category_id
+                    JOIN dvd d ON f.film_id = d.film_id
+                    WHERE c.category_name = '{category_name}' AND d.shop_id = {shop_id}"""
+
+    db_cursor.execute(sql_query)
+    result = db_cursor.fetchall()
+
+    for film in result:
+        print(film)
+
     wait_on_enter()
