@@ -4,6 +4,8 @@ from src.app import app
 from db.db import db_conn, db_cursor
 from utils.input import get_datetime_input
 
+from tabulate import tabulate
+
 
 def show_manager_screen():
     while True:
@@ -73,8 +75,10 @@ def show_customer_list():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Shop Name", "User ID", "First Name",
+               "Last Name", "Username", "Email"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -100,8 +104,10 @@ def show_rental_details():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Film Title", "Number of Rents",
+               "Average Score", "Number of DVDs", "Number of Delays"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -131,8 +137,9 @@ def show_active_rentals():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -163,8 +170,8 @@ def show_rent_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     rent_id = input("\nEnter rent ID to reject/accept (Enter \'0\' to exit): ")
     if rent_id == "0":
@@ -236,8 +243,8 @@ def show_reserve_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Reserve ID", "Customer ID", "DVD ID", "Created At"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     reserve_id = input(
         "\nEnter reserve ID to reject/accept (Enter '0' to exit): ")
@@ -315,8 +322,10 @@ def show_shop_info():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Shop ID", "Shop Name", "Manager ID", "Manager First Name", "Manager Last Name",
+               "Address", "Address2", "District", "Postal Code", "Phone", "Location", "City", "Country"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -423,8 +432,10 @@ def view_all_films():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Film Title", "Description", "Release Date",
+               "Rate", "Rent Cost Per Day", "Penalty Cost Per Day"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -521,8 +532,10 @@ def show_payment_details():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    for item in foundlist:
-        print(item)
+    headers = ["Payment ID", "Rental ID", "Film Title", "Payment Date",
+               "Amount", "Customer ID", "DVD ID", "Return Date", "Shop Name"]
+    print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
+
     wait_on_enter()
 
 
@@ -543,10 +556,8 @@ def show_films_by_cat():
     db_cursor.execute(sql_query)
     shop_categories = db_cursor.fetchall()
 
-    print("Your shop_ids and available categories are:")
-    for shop in shop_categories:
-        print(shop)
-        # print(f"Shop ID: {shop['shop_id']}, Shop Name: {shop['shop_name']}, Categories: {shop['categories']}")
+    headers = ["Shop ID", "Shop Name", "Categories"]
+    print(tabulate(shop_categories, headers=headers, tablefmt="pretty"))
 
     print("\n --- Select Shop and Category ---")
     shop_id = input("Enter shop_id: ")
@@ -562,8 +573,8 @@ def show_films_by_cat():
     db_cursor.execute(sql_query)
     result = db_cursor.fetchall()
 
-    for film in result:
-        print(film)
+    headers = ["Film ID", "Title", "Description", "Release Date"]
+    print(tabulate(result, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -629,8 +640,8 @@ def show_best_seller():
     db_cursor.execute(sql_query)
     result = db_cursor.fetchall()
 
-    for item in result:
-        print(item)
+    headers = ["ID", "Name", "Rental Count"]
+    print(tabulate(result, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
 
@@ -684,7 +695,7 @@ def search_films():
     db_cursor.execute(query)
     films = db_cursor.fetchall()
 
-    for f in films:
-        print(f)
+    headers = ["Film ID", "Title", "Description", "Release Date"]
+    print(tabulate(films, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
