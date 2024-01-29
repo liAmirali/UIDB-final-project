@@ -11,7 +11,7 @@ def show_customer_screen():
         clear_screen()
         print_header("Customer View")
 
-        print(" 1. All shops")
+        print(" 1. All Shops")
         print(" 2. View and Edit profile")
         print(" 3. Films by category")
         print(" 4. Search Films")
