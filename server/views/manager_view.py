@@ -20,7 +20,7 @@ def show_manager_screen():
         print(" 9. View all films by category")
         print("10. Search on films")
         print("11. Payment details")
-        print("12. BestSeller films")
+        print("12. BestSellers")
         print("13. Exit")
 
         option = read_menu_opt()
@@ -38,17 +38,17 @@ def show_manager_screen():
         elif option == "6":
             show_shop_info()
         elif option == "7":
-            edit_shop_info()  # TODO: fix!
+            edit_shop_info()
         elif option == "8":
             view_all_films()
         elif option == "9":
             show_films_by_cat()
         elif option == "10":
-            pass
+            search_films()
         elif option == "11":
             show_payment_details()
         elif option == "12":
-            pass
+            show_best_seller()
         elif option == "13":
             break
 
@@ -71,7 +71,8 @@ def show_customer_list():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -97,7 +98,8 @@ def show_rental_detail():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -128,7 +130,8 @@ def show_active_rentals():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -160,7 +163,8 @@ def show_rent_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -190,7 +194,8 @@ def show_reserve_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -228,7 +233,8 @@ def show_shop_info():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -298,12 +304,6 @@ def edit_shop_info():
 
         db_conn.commit()
 
-        db_cursor.execute(
-            f"SELECT * FROM user WHERE user_id={logged_in_user.user_id}")
-        foundUser = db_cursor.fetchone()
-        user = User(foundUser)
-        app.set_logged_in_user(user)
-
         print_success("Shop was edited successfully.")
     except Exception as e:
         db_conn.rollback()
@@ -342,7 +342,8 @@ def view_all_films():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -440,7 +441,8 @@ def show_payment_details():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    print(foundlist)
+    for item in foundlist:
+        print(item)
     wait_on_enter()
 
 
@@ -481,5 +483,120 @@ def show_films_by_cat():
 
     for film in result:
         print(film)
+
+    wait_on_enter()
+
+
+def show_best_seller():
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {manager_id}"""
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print("--- Your shops ---")
+    for shop in foundlist:
+        print(shop)
+
+    shop_id = input("Enter the shop_id: ")
+
+    print("1- BestSeller Film")
+    print("2- BestSeller Category")
+    print("3- BestSeller Actor")
+
+    opt = input("Enter command number: ")
+
+    if opt == "1":
+        sql_query = f"""SELECT f.film_id, f.title, COUNT(r.rental_id) as rental_count
+                        FROM film f
+                        JOIN dvd d ON f.film_id = d.film_id
+                        JOIN rental r ON d.dvd_id = r.dvd_id
+                        JOIN shop s ON d.shop_id = s.shop_id
+                        WHERE s.shop_id = {shop_id}
+                        GROUP BY f.film_id, f.title
+                        ORDER BY rental_count DESC
+                        LIMIT 1"""
+    elif opt == "2":
+        sql_query = f"""SELECT c.category_name, COUNT(r.rental_id) as rental_count
+                        FROM category c
+                        JOIN film_category fc ON c.category_id = fc.category_id
+                        JOIN film f ON fc.film_id = f.film_id
+                        JOIN dvd d ON f.film_id = d.film_id
+                        JOIN rental r ON d.dvd_id = r.dvd_id
+                        JOIN shop s ON d.shop_id = s.shop_id
+                        WHERE s.shop_id = {shop_id}
+                        GROUP BY c.category_id, c.category_name
+                        ORDER BY rental_count DESC
+                        LIMIT 1"""
+    elif opt == "3":
+        sql_query = f"""SELECT a.actor_id, a.first_name, a.last_name, COUNT(r.rental_id) as rental_count
+                        FROM actor a
+                        JOIN plays p ON a.actor_id = p.actor_id
+                        JOIN film f ON p.film_id = f.film_id
+                        JOIN dvd d ON f.film_id = d.film_id
+                        JOIN rental r ON d.dvd_id = r.dvd_id
+                        JOIN shop s ON d.shop_id = s.shop_id
+                        WHERE s.shop_id = {shop_id}
+                        GROUP BY a.actor_id, a.first_name, a.last_name
+                        ORDER BY rental_count DESC
+                        LIMIT 1"""
+
+    db_cursor.execute(sql_query)
+    result = db_cursor.fetchall()
+
+    for item in result:
+        print(item)
+
+    wait_on_enter()
+
+
+def search_films():
+    clear_screen()
+    print_header("Search Films")
+
+    manager_id = 6
+    # manager_id = app.logged_in_user.user_id
+
+    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {manager_id}"""
+    db_cursor.execute(sql_query)
+    foundlist = db_cursor.fetchall()
+
+    print("--- Your shops ---")
+    for shop in foundlist:
+        print(shop)
+
+    shop_id = input("Enter the shop_id: ")
+
+    print("1. By Actor")
+    print("2. By Genre")
+    print("3. By Film Name")
+    print("4. By Film Language")
+    print("5. By Release Year")
+
+    option = read_menu_opt()
+
+    search_query = input("Enter your search query: ")
+    if option == "1":
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE d.shop_id = {shop_id} AND first_name LIKE '%{search_query}%' OR last_name LIKE '%{search_query}%'"
+    elif option == "2":
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE d.shop_id = {shop_id} AND category_name LIKE '%{search_query}%'"
+    elif option == "3":
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {shop_id} AND title LIKE '%{search_query}%'"
+    elif option == "4":
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE d.shop_id = {shop_id} AND language_name LIKE '%{search_query}%'"
+    elif option == "5":
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {shop_id} AND YEAR(release_date) = {search_query}"
+    else:
+        print_error("Invalid option")
+        wait_on_enter()
+        return
+
+    db_cursor.execute(query)
+    films = db_cursor.fetchall()
+
+    for f in films:
+        print(f)
 
     wait_on_enter()
