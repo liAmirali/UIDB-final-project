@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS rental(
 	due_date TIMESTAMP NULL DEFAULT NULL,
     return_date TIMESTAMP NULL DEFAULT NULL,
     status ENUM("checking", "rejected", "accepted") DEFAULT "checking",
-    rate INT NULL DEFAULT NULL,
+    rate NUMERIC(2, 1) NULL DEFAULT NULL,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     foreign key (customer_id) references user(user_id),
 	foreign key (dvd_id) references dvd(dvd_id)
@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS rental(
 
 CREATE TABLE IF NOT EXISTS payment(
 	payment_id INT PRIMARY KEY auto_increment,
-    rental_id INT not null,
-    payment_date timestamp not null,
+    rental_id INT NOT NULL,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     amount INT not null,
     foreign key (rental_id) references rental(rental_id)
 );
