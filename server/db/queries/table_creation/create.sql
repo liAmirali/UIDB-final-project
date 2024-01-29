@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS film(
     title VARCHAR(100) not null,
 	description VARCHAR(250),
     release_date TIMESTAMP,
-    rate INT,
     rent_cost_per_day INT default 2,
     penalty_cost_per_day INT default 3
 );
@@ -130,7 +129,7 @@ CREATE TABLE IF NOT EXISTS film_language(
 -- trigger for delay condition and active rent for same dvd
 DELIMITER //
 CREATE TRIGGER check_maximum_delay
-BEFORE INSERT ON rental
+BEFORE UPDATE ON rental
 FOR EACH ROW
 BEGIN
     DECLARE delay_count INT;
@@ -170,7 +169,7 @@ END;
 //
 
 CREATE TRIGGER check_rent_count_limit
-BEFORE INSERT ON rental
+BEFORE UPDATE ON rental
 FOR EACH ROW
 BEGIN
     DECLARE active_rent_count INT;

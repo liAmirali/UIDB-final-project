@@ -2,6 +2,7 @@ from models.user import User
 from views.utils import *
 from src.app import app
 from db.db import db_conn, db_cursor
+from utils.input import get_datetime_input
 
 
 def show_manager_screen():
@@ -28,7 +29,7 @@ def show_manager_screen():
         if option == "1":
             show_customer_list()
         elif option == "2":
-            show_rental_detail()
+            show_rental_details()
         elif option == "3":
             show_active_rentals()
         elif option == "4":
@@ -58,15 +59,16 @@ def show_customer_list():
     clear_screen()
     print_header("Customer List")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
+
     sql_query = f"""
     SELECT s.shop_name, u.user_id, u.first_name, u.last_name, u.username, u.email
     FROM user u
     JOIN rental r ON u.user_id = r.customer_id
     JOIN dvd d ON r.dvd_id = d.dvd_id
     JOIN shop s ON d.shop_id = s.shop_id
-    WHERE s.manager_id = {manager_id}"""
+    WHERE s.manager_id = {manager_id}
+    ORDER BY s.shop_name"""
 
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
@@ -76,17 +78,17 @@ def show_customer_list():
     wait_on_enter()
 
 
-def show_rental_detail():
+def show_rental_details():
 
     clear_screen()
-    print_header("Rental Detail")
+    print_header("Rental Details")
 
-    film_id = input("Enter film_id:")
+    film_id = input("Enter Film ID: ")
 
     sql_query = f"""SELECT
     f.title AS film_title,
     COUNT(r.rental_id) AS number_of_rents,
-    AVG(f.rate) AS average_score,
+    AVG(r.rate) AS average_score,
     COUNT(d.dvd_id) AS number_of_dvds,
     SUM(CASE WHEN r.return_date > r.due_date THEN 1 ELSE 0 END) AS number_of_delays
     FROM film f
@@ -108,8 +110,7 @@ def show_active_rentals():
     clear_screen()
     print_header("Active Rental")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
     sql_query = f"""SELECT
     r.rental_id,
@@ -140,8 +141,7 @@ def show_rent_requests():
     clear_screen()
     print_header("Rent Requests")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
     sql_query = f"""SELECT
     r.rental_id,
@@ -165,6 +165,49 @@ def show_rent_requests():
 
     for item in foundlist:
         print(item)
+
+    rent_id = input("\nEnter rent ID to reject/accept (Enter \'0\' to exit): ")
+    if rent_id == "0":
+        return
+    else:
+        found = False
+        for rental in foundlist:
+            if str(rental[0]) == rent_id:
+                found = True
+                break
+        if not found:
+            print_error("Rental was not found.")
+            wait_on_enter()
+            return
+
+        rejectAccept = input("Enter \"R\" to Reject or \"A\" to Accept: ")
+
+        if rejectAccept == "R":
+            try:
+                db_cursor.execute(
+                    f"UPDATE rental SET status='rejected' WHERE rental_id={rent_id}")
+                print_success("Rental was rejected successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error rejecting rental: {e}")
+
+        elif rejectAccept == "A":
+            try:
+                rental_datetime = get_datetime_input("Enter rental datetime")
+                due_datetime = get_datetime_input("Enter due datetime")
+
+                db_cursor.execute(f"""UPDATE rental
+                                  SET status='accepted', rental_date='{rental_datetime}', due_date='{due_datetime}'
+                                  WHERE rental_id={rent_id}""")
+                db_conn.commit()
+
+                print_success("Rental was accepted successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error accepting rental: {e}")
+        else:
+            print("Exiting...")
+
     wait_on_enter()
 
 
@@ -173,8 +216,7 @@ def show_reserve_requests():
     clear_screen()
     print_header("Reserve Requests")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
     sql_query = f""" SELECT
     r.reserve_id,
@@ -204,8 +246,7 @@ def show_shop_info():
     clear_screen()
     print_header("Shop info")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
     sql_query = f"""SELECT
     s.shop_id,
@@ -240,12 +281,12 @@ def show_shop_info():
 
 def edit_shop_info():
     clear_screen()
-    print_header("Shop Info Edit")
+    print_header("Edit Shop Info")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
-    sql_query = f"""SELECT shop_id, shop_name, address_id FROM shop WHERE manager_id = {manager_id}"""
+    sql_query = f"""SELECT shop_id, shop_name, address_id FROM shop WHERE manager_id = {
+        manager_id}"""
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
@@ -316,10 +357,9 @@ def edit_shop_info():
 def view_all_films():
 
     clear_screen()
-    print_header("All Film")
+    print_header("All Films")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
     sql_query = f"""SELECT
     f.title AS film_title,
@@ -355,8 +395,7 @@ def show_payment_details():
     print("2. Show payments of specific customer")
     print("3. Show payments of specific film")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
     option = read_menu_opt()
 
     if option == "1":
@@ -447,15 +486,16 @@ def show_payment_details():
 
 
 def show_films_by_cat():
+    clear_screen()
+    print_header("Films By Category")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
-    sql_query = f"""SELECT s.shop_id, s.shop_name, GROUP_CONCAT(DISTINCT c.category_name) AS categories 
-                        FROM shop s 
-                        JOIN dvd d ON s.shop_id = d.shop_id 
-                        JOIN film f ON d.film_id = f.film_id 
-                        JOIN film_category fc ON f.film_id = fc.film_id 
-                        JOIN category c ON fc.category_id = c.category_id 
+    manager_id = app.logged_in_user.user_id
+    sql_query = f"""SELECT s.shop_id, s.shop_name, GROUP_CONCAT(DISTINCT c.category_name) AS categories
+                        FROM shop s
+                        JOIN dvd d ON s.shop_id = d.shop_id
+                        JOIN film f ON d.film_id = f.film_id
+                        JOIN film_category fc ON f.film_id = fc.film_id
+                        JOIN category c ON fc.category_id = c.category_id
                         WHERE s.manager_id = {manager_id}
                         GROUP BY s.shop_id, s.shop_name"""
 
@@ -488,11 +528,13 @@ def show_films_by_cat():
 
 
 def show_best_seller():
+    clear_screen()
+    print_header("Films By Category")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
-    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {manager_id}"""
+    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {
+        manager_id}"""
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
@@ -556,10 +598,10 @@ def search_films():
     clear_screen()
     print_header("Search Films")
 
-    manager_id = 6
-    # manager_id = app.logged_in_user.user_id
+    manager_id = app.logged_in_user.user_id
 
-    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {manager_id}"""
+    sql_query = f"""SELECT shop_id, shop_name FROM shop WHERE manager_id = {
+        manager_id}"""
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
@@ -579,15 +621,20 @@ def search_films():
 
     search_query = input("Enter your search query: ")
     if option == "1":
-        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE d.shop_id = {shop_id} AND first_name LIKE '%{search_query}%' OR last_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN plays USING (film_id) JOIN actor USING (actor_id) WHERE d.shop_id = {
+            shop_id} AND first_name LIKE '%{search_query}%' OR last_name LIKE '%{search_query}%'"
     elif option == "2":
-        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE d.shop_id = {shop_id} AND category_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_category USING (film_id) JOIN category USING (category_id) WHERE d.shop_id = {
+            shop_id} AND category_name LIKE '%{search_query}%'"
     elif option == "3":
-        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {shop_id} AND title LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {
+            shop_id} AND title LIKE '%{search_query}%'"
     elif option == "4":
-        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE d.shop_id = {shop_id} AND language_name LIKE '%{search_query}%'"
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) JOIN film_language USING (film_id) JOIN language USING (language_id) WHERE d.shop_id = {
+            shop_id} AND language_name LIKE '%{search_query}%'"
     elif option == "5":
-        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {shop_id} AND YEAR(release_date) = {search_query}"
+        query = f"SELECT * FROM film JOIN dvd d USING (film_id) WHERE d.shop_id = {
+            shop_id} AND YEAR(release_date) = {search_query}"
     else:
         print_error("Invalid option")
         wait_on_enter()
