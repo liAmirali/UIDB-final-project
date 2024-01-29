@@ -230,6 +230,7 @@ def show_reserve_requests():
     r.customer_id,
     r.dvd_id,
     r.created_at
+    r.accepted
     FROM
         reserve r
     JOIN
@@ -243,7 +244,7 @@ def show_reserve_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    headers = ["Reserve ID", "Customer ID", "DVD ID", "Created At"]
+    headers = ["Reserve ID", "Customer ID", "DVD ID", "Created At", "Accepted"]
     print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     reserve_id = input(
