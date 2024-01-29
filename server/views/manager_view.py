@@ -12,6 +12,7 @@ def show_manager_screen():
         clear_screen()
         print_header("Manager Page")
 
+        print(" 0. Create Shop")
         print(" 1. Customer List")
         print(" 2. Film Rental Details")
         print(" 3. Active Rentals")
@@ -28,7 +29,9 @@ def show_manager_screen():
 
         option = read_menu_opt()
 
-        if option == "1":
+        if option == "0":
+            create_shop()
+        elif option == "1":
             show_customer_list()
         elif option == "2":
             show_rental_details()
@@ -54,6 +57,39 @@ def show_manager_screen():
             show_best_seller()
         elif option == "13":
             break
+
+def create_shop():
+    clear_screen()
+    print_header("Create Shop")
+
+    manager_id = app.logged_in_user.user_id
+
+    # Check the number of shops the manager already has
+    sql_count_query = f"SELECT COUNT(*) FROM shop WHERE manager_id = {manager_id}"
+    db_cursor.execute(sql_count_query)
+    shop_count = db_cursor.fetchone()[0]
+
+    if shop_count >= 2:
+        print_error("You already have the maximum number of shops.")
+        wait_on_enter()
+        return
+
+    # Proceed with creating a new shop
+    shop_name = input("Enter the name for your new shop: ")
+
+    try:
+        # Insert query to add the new shop
+        sql_insert_query = f"""INSERT INTO shop (shop_name, manager_id)
+                               VALUES ('{shop_name}', {manager_id})"""
+        db_cursor.execute(sql_insert_query)
+        db_conn.commit()
+
+        print_success("Shop created successfully.")
+    except Exception as e:
+        db_conn.rollback()
+        print_error(f"Error creating shop: {e}")
+
+    wait_on_enter()
 
 
 def show_customer_list():
