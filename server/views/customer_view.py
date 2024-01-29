@@ -1,3 +1,5 @@
+import datetime
+
 from views.utils import *
 from db.db import db_cursor, db_conn
 from src.app import app
@@ -39,6 +41,8 @@ def show_customer_screen():
             reserve_film()
         elif option == '8':
             rent_dvd()
+        elif option == '9':
+            return_dvd()
         elif option == "12":
             break
 
@@ -301,9 +305,10 @@ def reserve_film():
 
     wait_on_enter()
 
+
 def rent_dvd():
     clear_screen()
-    print_header("Reserve a Film")
+    print_header("Rent a Film")
 
     logged_in_user_id = app.logged_in_user.user_id
 
@@ -327,7 +332,7 @@ def rent_dvd():
             JOIN shop USING (shop_id)
         WHERE status='accepted' AND return_date IS NULL
         """)
-    
+
     result = db_cursor.fetchall()
     if result is None or len(result) == 0:
         print_error("No DVDs found for this film.")
@@ -351,6 +356,74 @@ def rent_dvd():
 
                 db_conn.commit()
                 print_success("DVD was rented successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error in renting: {str(e)}")
+
+    wait_on_enter()
+
+
+def return_dvd():
+    clear_screen()
+    print_header("Return a DVD")
+
+    logged_in_user_id = app.logged_in_user.user_id
+    selected_dvd_id = input("Please enter the DVD ID you want to return: ")
+    db_cursor.execute(f"""SELECT
+                      rental_id,
+                      dvd_id, shop_name,
+                      rental_date, due_date, TIMESTAMPDIFF(DAY, rental_date, due_date) as remaining_time,
+                      rent_cost_per_day, penalty_cost_per_day
+                      FROM rental
+                        JOIN dvd USING (dvd_id)
+                        JOIN shop USING (shop_id)
+                        JOIN film USING (film_id)
+                      WHERE customer_id={logged_in_user_id} AND return_date is NULL AND status='accepted'
+    """)
+    active_rents = db_cursor.fetchall()
+    if active_rents is None or len(active_rents) == 0:
+        print_error("No active rent!")
+    else:
+        print("Active rents (ID, DVD ID, Shop Name, Rented At, Due Date, Remaining Time, Cost per day, Penalty per day):")
+        for dvd in active_rents:
+            print(dvd)
+
+        selected_dvd_id = input("\nSelect a DVD ID: ")
+        found = False
+        for res in active_rents:
+            if str(res[0]) == selected_dvd_id:
+                found = True
+                break
+
+        if not found:
+            print_error("Your selected DVD is not available.")
+        else:
+            user_rate = input("Input your rate in range [0-5]:")
+
+            try:
+                rental_id = res[0]
+                rental_date = res[3]
+                due_date = res[4]
+                rental_duration = (due_date - rental_date).days
+                rent_cost_per_day = res[6]
+                penalty_cost_per_day = res[7]
+                days_after_due_date = max(
+                    (datetime.datetime.now().date() - due_date).days, 0)
+                return_cost = rental_duration * rent_cost_per_day + \
+                    days_after_due_date * penalty_cost_per_day
+
+                print(f"The cost is ${return_cost}")
+                payment_confirmed = input("Pay and Return? (Y/N): ")
+                if payment_confirmed == "Y" or payment_confirmed == "y":
+                    db_cursor.execute(f"""UPDATE rental
+                                    SET due_date=NOW()
+                                    rate={user_rate}""")
+
+                    db_cursor.execute(
+                        "INSERT INTO payment (rental_id, amount) VALUES (%s, %s, %s)", (rental_id, return_cost))
+
+                db_conn.commit()
+                print_success("DVD was returned successfully.")
             except Exception as e:
                 db_conn.rollback()
                 print_error(f"Error in renting: {str(e)}")

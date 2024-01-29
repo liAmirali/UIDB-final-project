@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS rental(
 
 CREATE TABLE IF NOT EXISTS payment(
 	payment_id INT PRIMARY KEY auto_increment,
-    rental_id INT not null,
-    payment_date timestamp not null,
+    rental_id INT NOT NULL,
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     amount INT not null,
     foreign key (rental_id) references rental(rental_id)
 );
