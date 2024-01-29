@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS film_language(
 -- trigger for delay condition and active rent for same dvd
 DELIMITER //
 CREATE TRIGGER check_maximum_delay
-BEFORE UPDATE ON rental
+BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
     DECLARE delay_count INT;
@@ -169,7 +169,7 @@ END;
 //
 
 CREATE TRIGGER check_rent_count_limit
-BEFORE UPDATE ON rental
+BEFORE INSERT ON rental
 FOR EACH ROW
 BEGIN
     DECLARE active_rent_count INT;

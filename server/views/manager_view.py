@@ -218,7 +218,7 @@ def show_reserve_requests():
 
     manager_id = app.logged_in_user.user_id
 
-    sql_query = f""" SELECT
+    sql_query = f"""SELECT
     r.reserve_id,
     r.customer_id,
     r.dvd_id,
@@ -231,13 +231,54 @@ def show_reserve_requests():
         shop s ON d.shop_id = s.shop_id
     WHERE
         s.manager_id = {manager_id}
-        AND r.accepted is NULL """
+        AND r.expired = 0"""
 
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
     for item in foundlist:
         print(item)
+
+    reserve_id = input(
+        "\nEnter reserve ID to reject/accept (Enter '0' to exit): ")
+    if reserve_id == "0":
+        return
+    else:
+        found = False
+        for reserve in foundlist:
+            if str(reserve[0]) == reserve_id:
+                found = True
+                break
+        if not found:
+            print_error("Reservation was not found.")
+            wait_on_enter()
+            return
+
+        rejectAccept = input("Enter 'R' to Reject or 'A' to Accept: ")
+
+        if rejectAccept == "R":
+            try:
+                db_cursor.execute(
+                    f"UPDATE reserve SET accepted = 0 WHERE reserve_id={reserve_id}")
+                print_success("Reservation was rejected successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error rejecting reservation: {e}")
+
+        elif rejectAccept == "A":
+            try:
+                db_cursor.execute(f"""UPDATE reserve
+                                  SET accepted = 1, check_date = NOW()
+                                  WHERE reserve_id={reserve_id}""")
+                db_conn.commit()
+
+                print_success("Reservation was accepted successfully.")
+            except Exception as e:
+                db_conn.rollback()
+                print_error(f"Error accepting reservation: {e}")
+        else:
+            print("Exiting...")
+
     wait_on_enter()
 
 
