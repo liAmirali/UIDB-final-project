@@ -229,7 +229,8 @@ def search_films():
     db_cursor.execute(query)
     films = db_cursor.fetchall()
 
-    headers = ["Film ID", "Title", "Description", "Release Date", "Rate", "Rent Cost per Day", "Penalty Cost per Day"]
+    headers = ["Film ID", "Title", "Description", "Release Date",
+               "Rate", "Rent Cost per Day", "Penalty Cost per Day"]
     print(tabulate(films, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
@@ -260,7 +261,8 @@ def get_rental_history():
         f"SELECT * FROM rental WHERE customer_id={logged_in_user_id}")
     history = db_cursor.fetchall()
 
-    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date", "Return Date", "Rate", "Status"]
+    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date",
+               "Due Date", "Return Date", "Rate", "Status", "Last Update"]
     print(tabulate(history, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
@@ -393,7 +395,8 @@ def return_dvd():
     if active_rents is None or len(active_rents) == 0:
         print_error("No active rent!")
     else:
-        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At", "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
+        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At",
+                   "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
         print(tabulate(active_rents, headers=headers, tablefmt="pretty"))
 
         selected_rental_id = input(
@@ -465,7 +468,8 @@ def show_active_rents():
     if active_rents is None or len(active_rents) == 0:
         print_error("No active rents!")
     else:
-        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At", "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
+        headers = ["Rental ID", "DVD ID", "Shop Name", "Rented At",
+                   "Due Date", "Remaining Time", "Cost per day", "Penalty per day"]
         print(tabulate(active_rents, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
@@ -481,7 +485,9 @@ def show_payment_information():
         f"SELECT * FROM payment JOIN rental USING (rental_id) WHERE customer_id={customer_id}")
     result = db_cursor.fetchall()
 
-    headers = ["Payment ID", "Rental ID", "Amount"]
+    headers = ["Rental ID", "Payment ID", "Payment Date", "Customer ID",
+               "DVD ID", "Rental Date", "Due Date", "Return Date" "Amount",
+               "Status", "Rate", "Last Update"]
     print(tabulate(result, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()

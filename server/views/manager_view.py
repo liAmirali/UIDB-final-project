@@ -77,10 +77,25 @@ def create_shop():
     # Proceed with creating a new shop
     shop_name = input("Enter the name for your new shop: ")
 
+    print("\n--- Address ---")
+    street_address = input("Enter street address: ")
+    district = input("Enter district: ")
+    postal_code = input("Enter postal code: ")
+    phone = input("Enter phone number: ")
+    city = input("Enter city: ")
+    country = input("Enter country: ")
+
     try:
+        db_cursor.execute("INSERT INTO address (address, district, postal_code, phone, city, country) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (street_address, district, postal_code, phone, city, country))
+        db_conn.commit()
+
+        # Retrieve the generated address ID
+        address_id = db_cursor.lastrowid
+
         # Insert query to add the new shop
-        sql_insert_query = f"""INSERT INTO shop (shop_name, manager_id)
-                               VALUES ('{shop_name}', {manager_id})"""
+        sql_insert_query = f"""INSERT INTO shop (shop_name, manager_id, address_id)
+                               VALUES ('{shop_name}', {manager_id}, {address_id})"""
         db_cursor.execute(sql_insert_query)
         db_conn.commit()
 
@@ -128,7 +143,7 @@ def show_rental_details():
     sql_query = f"""SELECT
     f.title AS film_title,
     COUNT(r.rental_id) AS number_of_rents,
-    AVG(r.rate) AS average_score,
+    AVG(CASE WHEN r.rate IS NOT NULL THEN r.rate ELSE 0 END) AS average_score,
     COUNT(d.dvd_id) AS number_of_dvds,
     SUM(CASE WHEN r.return_date > r.due_date THEN 1 ELSE 0 END) AS number_of_delays
     FROM film f
@@ -156,14 +171,18 @@ def show_active_rentals():
 
     sql_query = f"""SELECT
     r.rental_id,
+    s.shop_name,
     r.customer_id,
     r.dvd_id,
+    f.title,
     r.rental_date,
     r.due_date
     FROM
         rental r
     JOIN
         dvd d ON r.dvd_id = d.dvd_id
+    JOIN
+        film f ON f.film_id = d.film_id
     JOIN
         shop s ON d.shop_id = s.shop_id
     WHERE
@@ -173,7 +192,7 @@ def show_active_rentals():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date"]
+    headers = ["Rental ID", "Shop Name", "Customer ID", "DVD ID", "Film Title", "Rental Date", "Due Date"]
     print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()
@@ -188,14 +207,19 @@ def show_rent_requests():
 
     sql_query = f"""SELECT
     r.rental_id,
+    s.shop_name,
     r.customer_id,
     r.dvd_id,
+    f.title,
+    f.film_id,
     r.rental_date,
     r.due_date
     FROM
         rental r
     JOIN
         dvd d ON r.dvd_id = d.dvd_id
+    JOIN
+        film f ON f.film_id = d.film_id
     JOIN
         shop s ON d.shop_id = s.shop_id
     WHERE
@@ -206,7 +230,7 @@ def show_rent_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    headers = ["Rental ID", "Customer ID", "DVD ID", "Rental Date", "Due Date"]
+    headers = ["Rental ID", "Shop Name", "Customer ID", "DVD ID", "Film Title", "Film ID", "Rental Date", "Due Date"]
     print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     rent_id = input("\nEnter rent ID to reject/accept (Enter \'0\' to exit): ")
@@ -263,14 +287,19 @@ def show_reserve_requests():
 
     sql_query = f"""SELECT
     r.reserve_id,
+    s.shop_name,
     r.customer_id,
     r.dvd_id,
-    r.created_at
+    f.title,
+    f.film_id,
+    r.created_at,
     r.accepted
     FROM
         reserve r
     JOIN
         dvd d ON r.dvd_id = d.dvd_id
+    JOIN
+        film f ON f.film_id = d.film_id
     JOIN
         shop s ON d.shop_id = s.shop_id
     WHERE
@@ -280,7 +309,7 @@ def show_reserve_requests():
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    headers = ["Reserve ID", "Customer ID", "DVD ID", "Created At", "Accepted"]
+    headers = ["Reservation ID", "Shop Name", "Customer ID", "DVD ID", "Film Title", "Film ID", "Created At", "Accepted"]
     print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     reserve_id = input(
@@ -372,8 +401,7 @@ def edit_shop_info():
 
     manager_id = app.logged_in_user.user_id
 
-    sql_query = f"""SELECT shop_id, shop_name, address_id FROM shop WHERE manager_id = {
-        manager_id}"""
+    sql_query = f"""SELECT shop_id, shop_name, address_id FROM shop WHERE manager_id = {manager_id}"""
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
@@ -381,17 +409,17 @@ def edit_shop_info():
     for shop in foundlist:
         print(shop)
 
-    shop_id = input("Enter the shop_id: ")
+    shop_id = input("Enter the Shop ID: ")
 
     for shop in foundlist:
-        if shop[0] == shop_id:
+        if str(shop[0]) == shop_id:
             address_id = shop[2]
 
     print("* Hit enter to keep the old value *")
 
     print("\n --- Shop Information ---")
 
-    shop_name = input("Shop_name: ")
+    shop_name = input("Shop Name: ")
 
     print("\n --- Address ---")
 
@@ -404,7 +432,7 @@ def edit_shop_info():
     city = input("City: ")
     country = input("Country: ")
 
-    update_shop_query = f"""UPDATE user
+    update_shop_query = f"""UPDATE shop
     SET
         shop_name = {'"' + shop_name + '"' if shop_name != "" else 'shop_name'}
     WHERE
@@ -423,8 +451,6 @@ def edit_shop_info():
         country = {'"' + country + '"' if country != "" else 'country'}
     WHERE
         address_id = {address_id}"""
-
-    print("update_address_query:", update_address_query)
 
     try:
         db_cursor.execute(update_shop_query)
@@ -449,12 +475,14 @@ def view_all_films():
     manager_id = app.logged_in_user.user_id
 
     sql_query = f"""SELECT
-    f.title AS film_title,
+    s.shop_name,
+    f.title,
+    f.film_id,
     f.description,
     f.release_date,
-    f.rate,
     f.rent_cost_per_day,
-    f.penalty_cost_per_day
+    f.penalty_cost_per_day,
+    COUNT(d.dvd_id)
     FROM
         film f
     JOIN
@@ -463,14 +491,14 @@ def view_all_films():
         shop s ON d.shop_id = s.shop_id
     WHERE
         s.manager_id = {manager_id}
-    ORDER BY
-        f.rate DESC"""
+    GROUP BY
+        shop_name, f.title, f.film_id, f.description, f.release_date, f.rent_cost_per_day,f.penalty_cost_per_day
+"""
 
     db_cursor.execute(sql_query)
     foundlist = db_cursor.fetchall()
 
-    headers = ["Film Title", "Description", "Release Date",
-               "Rate", "Rent Cost Per Day", "Penalty Cost Per Day"]
+    headers = ["Shop Name", "Film Title", "Film ID", "Description", "Release Date", "Rent Cost Per Day", "Penalty Cost Per Day", "DVD Count"]
     print(tabulate(foundlist, headers=headers, tablefmt="pretty"))
 
     wait_on_enter()

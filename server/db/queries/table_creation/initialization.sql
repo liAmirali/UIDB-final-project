@@ -31,26 +31,25 @@ INSERT INTO address (address, address2, district, postal_code, phone, location, 
 ("1616 Pear Place", "Apt 501", "Valley", "56789", "444-555-6666", "Denver", "Colorado", "USA"),
 ("1717 Watermelon Avenue", "", "Mountains", "98765", "888-999-0000", "Honolulu", "Hawaii", "USA");
 
-
 -- Insert data into the user table
 INSERT INTO user (first_name, last_name, username, password, email, address_id, role) VALUES
-('John', 'Doe', 'johndoe', 'password1', 'john.doe@example.com', 1, 'customer'),
-('Jane', 'Smith', 'janesmith', 'password2', 'jane.smith@example.com', 2, 'customer'),
-('Michael', 'Johnson', 'michaelj', 'password3', 'michael.j@example.com', 3, 'manager'),
-('Emily', 'Brown', 'emilyb', 'password4', 'emily.b@example.com', 4, 'customer'),
-('William', 'Jones', 'willj', 'password5', 'william.j@example.com', 5, 'customer'),
-('Olivia', 'Taylor', 'oliviat', 'password6', 'olivia.t@example.com', 6, 'manager'),
-('James', 'Wilson', 'jamesw', 'password7', 'james.w@example.com', 7, 'customer'),
-('Emma', 'Martinez', 'emmam', 'password8', 'emma.m@example.com', 8, 'customer'),
-('Daniel', 'Anderson', 'danield', 'password9', 'daniel.a@example.com', 9, 'manager'),
-('Sophia', 'Hernandez', 'sophiah', 'password10', 'sophia.h@example.com', 10, 'customer'),
+('John', 'Doe', 'user1', 'password1', 'john.doe@example.com', 1, 'customer'),
+('Jane', 'Smith', 'user2', 'password2', 'jane.smith@example.com', 2, 'customer'),
+('Michael', 'Johnson', 'user3', 'password3', 'michael.j@example.com', 3, 'manager'),
+('Emily', 'Brown', 'user4', 'password4', 'emily.b@example.com', 4, 'customer'),
+('William', 'Jones', 'user5', 'password5', 'william.j@example.com', 5, 'customer'),
+('Olivia', 'Taylor', 'user6', 'password6', 'olivia.t@example.com', 6, 'manager'),
+('James', 'Wilson', 'user7', 'password7', 'james.w@example.com', 7, 'customer'),
+('Emma', 'Martinez', 'user8', 'password8', 'emma.m@example.com', 8, 'customer'),
+('Daniel', 'Anderson', 'user9', 'password9', 'daniel.a@example.com', 9, 'manager'),
+('Sophia', 'Hernandez', 'user10', 'password10', 'sophia.h@example.com', 10, 'customer'),
 ('Asal', 'Khaef', 'asal', 'password11', 'asal.kh@example.com', 11, 'manager'),
 ('Amirali', 'Lotfi', 'amirali', 'password12', 'amirali.l@example.com', 12, 'manager');
 
 -- Insert data into the film table
 INSERT INTO film (title, description, release_date, rent_cost_per_day, penalty_cost_per_day) VALUES
 ('The Matrix', 'A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.', '1999-03-31', 3, 4),
-('Inception', 'A thief who enters the dreams of others to steal secrets from their subconscious.', '2010-07-16', 4, 2, 3),
+('Inception', 'A thief who enters the dreams of others to steal secrets from their subconscious.', '2010-07-16', 2, 3),
 ('The Shawshank Redemption', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', '1994-10-14', 2, 3),
 ('Pulp Fiction', 'The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', '1994-10-14', 2, 3),
 ('The Dark Knight', 'When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.', '2008-07-18', 2, 3),
@@ -62,15 +61,15 @@ INSERT INTO film (title, description, release_date, rent_cost_per_day, penalty_c
 
 -- Insert data into the shop table
 INSERT INTO shop (shop_name, manager_id, address_id) VALUES
-('Movie Haven', 3, 1),
-('Cineplex Emporium', 6, 2),
-('Film Central', 9, 3),
-('Blockbuster Palace', 3, 4),
-('Cinema World', 6, 5),
-('Flicks \'n\' Chill', 9, 6),
-('Silver Screen Cinema', 11, 7),
-('Theatre House', 11, 8),
-('Picture Perfect', 12, 9);
+('Movie Haven', 3, 13),
+('Cineplex Emporium', 6, 14),
+('Film Central', 9, 15),
+('Blockbuster Palace', 9, 16),
+('Cinema World', 6, 17),
+('Flicks \'n\' Chill', 12, 18),
+('Silver Screen Cinema', 11, 19),
+('Theatre House', 11, 20),
+('Picture Perfect', 12, 21);
 
 -- Insert data into the dvd table
 INSERT INTO dvd (film_id, shop_id, production_date) VALUES
@@ -161,30 +160,30 @@ INSERT INTO reserve (customer_id, dvd_id) VALUES
 (10, 10);
 
 -- Insert data into the rental table
-INSERT INTO rental (customer_id, dvd_id, rental_date, due_date) VALUES
-(1, 1, '2023-01-01', '2023-01-08'),
-(2, 2, '2023-01-02', '2023-01-09'),
-(3, 3, '2023-01-03', '2023-01-10'),
-(4, 4, '2023-01-04', '2023-01-11'),
-(5, 5, '2023-01-05', '2023-01-12'),
-(6, 6, '2023-01-06', '2023-01-13'),
-(7, 7, '2023-01-07', '2023-01-14'),
-(8, 8, '2023-01-08', '2023-01-15'),
-(9, 9, '2023-01-09', '2023-01-16'),
-(10, 10, '2023-01-10', '2023-01-17');
+INSERT INTO rental (customer_id, dvd_id) VALUES
+(1, 11),
+(2, 12),
+(3, 13),
+(4, 14),
+(5, 15),
+(6, 16),
+(7, 17),
+(8, 18),
+(9, 19),
+(10, 20);
 
 -- Insert data into the payment table
-INSERT INTO payment (rental_id, payment_date, amount) VALUES
-(1, '2023-01-08', 16),
-(2, '2023-01-09', 18),
-(3, '2023-01-10', 20),
-(4, '2023-01-11', 22),
-(5, '2023-01-12', 24),
-(6, '2023-01-13', 26),
-(7, '2023-01-14', 28),
-(8, '2023-01-15', 30),
-(9, '2023-01-16', 32),
-(10, '2023-01-17', 34);
+-- INSERT INTO payment (rental_id, payment_date, amount) VALUES
+-- (1, '2023-01-08', 16),
+-- (2, '2023-01-09', 18),
+-- (3, '2023-01-10', 20),
+-- (4, '2023-01-11', 22),
+-- (5, '2023-01-12', 24),
+-- (6, '2023-01-13', 26),
+-- (7, '2023-01-14', 28),
+-- (8, '2023-01-15', 30),
+-- (9, '2023-01-16', 32),
+-- (10, '2023-01-17', 34);
 
 -- Insert data into the actor table
 INSERT INTO actor (first_name, last_name) VALUES
@@ -249,15 +248,7 @@ INSERT INTO film_category (film_id, category_id) VALUES
 (7, 3),
 (8, 4),
 (9, 1),
-(10, 2);, '2023-01-09', 18),
-(3, '2023-01-10', 20),
-(4, '2023-01-11', 22),
-(5, '2023-01-12', 24),
-(6, '2023-01-13', 26),
-(7, '2023-01-14', 28),
-(8, '2023-01-15', 30),
-(9, '2023-01-16', 32),
-(10, '2023-01-17', 34);
+(10, 2);
 
 -- Insert data into the film_language table
 INSERT INTO film_language (film_id, language_id) VALUES
